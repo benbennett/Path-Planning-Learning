@@ -84,6 +84,9 @@ class Key:
         return False
 
 class AnytimeDstar:
+    """
+    Main portion of algorithm. 
+    """
     def __init__(self,start,goal,forbidden):
         self.OPEN = priorityDictionary()
         self.INCONS= set() 
@@ -97,30 +100,14 @@ class AnytimeDstar:
         self.s_goal = State(goal,start,goal)
         self.s_goal.set_g(constants.INF)
         self.s_goal.set_rhs(0)
-        self.eps = 2.5 # TODO
+        self.eps = 2.5 # TODO make it change during iterations. 
         self.PREC = {}
         self.G = {} 
-        self.forbidden = forbidden#TODO
+        self.forbidden = forbidden#TODO add "obstacles" 
         self.OPEN[self.s_goal] = self.keys(self.s_goal)
 
-        
-    def keys(self,s):  #state 
-        if s.g()>s.rhs():
-            return Key([ s.rhs() + self.eps*s.h(),s.rhs()])
-        else:
-            return Key([ s.g() + s.h(),s.g()])
-
-    def UpdateState(self,s):
-        if not s.isGoal():
-            s.set_rhs(s.min_of_successors())
-        if s in self.OPEN :
-            self.OPEN.remove(s)
-        if s.g()!=s.rhs():
-            if not s in self.CLOSED:
-                self.OPEN[s] = self.keys(s)
-            else:
-                self.INCONS.add(s) 
     def __build_state__(self,s):
+        """ Utility method to build up a unvisited state"""
         if not self.G.has_key(s):
             self.G[s.point]= s
         if s.successors!=None:
@@ -139,16 +126,23 @@ class AnytimeDstar:
                 newstate = State(x,self.start,self.goal)
                 self.G[x] = newstate
             s.successors.add(newstate)
-          #if x in hold_v and x in forbidden:
-           #   hold_v.remove(x)
-              
- #           for w in G[v]:
- #             if w in forbidden:
- #                 pass
- #             vwLength = D[v] + 1 + abs((end[0]-w[0]))+abs((end[1]-w[1]))
- #             if w not in D or vwLength < D[w]:
- #                 Q[w] = vwLength
- #                 P[w] = v
+        
+    def keys(self,s):  #state 
+        if s.g()>s.rhs():
+            return Key([ s.rhs() + self.eps*s.h(),s.rhs()])
+        else:
+            return Key([ s.g() + s.h(),s.g()])
+
+    def UpdateState(self,s):
+        if not s.isGoal():
+            s.set_rhs(s.min_of_successors())
+        if s in self.OPEN :
+            self.OPEN.remove(s)
+        if s.g()!=s.rhs():
+            if not s in self.CLOSED:
+                self.OPEN[s] = self.keys(s)
+            else:
+                self.INCONS.add(s) 
 
     def ComputeorImprovePath(self):
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \
