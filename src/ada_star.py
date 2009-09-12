@@ -41,6 +41,26 @@ def state_trans_fuction(x,action_space,sX):
         
 
 class Key:
+    """
+    Used for the priority queue .
+    OVERVIEW of class 
+   key(s) = [k1 (s), k2 (s)]
+       = [min(g(s), rhs(s)) + h(sstart , s),
+          min(g(s), rhs(s))].
+ 
+    key(s) < key(s ),
+    iff k1 (s) < k1 (s ) OR
+    both k1 (s) = k1 (s )  and k2 (s) < k2 (s ). 
+    
+    The algorithm will go states with increasing priority,
+    updating there g-values and rhs-values of their PREDECESSORS,
+    'Until there is no state in the queue with a key value less than 
+    that of the start state.Thus,
+    during its generation of an initial solution path, it performs
+    in exactly the same manner as a backwards A* search'
+    
+    So the rhs values change for predecessors 
+    """
     def __init__(self,an_array=[0,0]):
         self.k1= an_array[0]
         self.k2= an_array[1]
