@@ -15,7 +15,7 @@ import math
 from priodict import priorityDictionary
 import copy
 #local modules
-from state import state
+from state import State 
 import constants
 
 #x,y  grid 10x10
@@ -71,10 +71,10 @@ class AnytimeDstar:
         self.CLOSED = set()
         self.start=start
         self.goal=goal
-        self.s_start = state(start,start,goal)
+        self.s_start = State(start,start,goal)
         self.s_start.set_rhs(constants.INF)
         self.s_start.set_g(constants.INF)
-        self.s_goal = state(goal,start,goal)
+        self.s_goal = State(goal,start,goal)
         self.s_goal.set_g(constants.INF)
         self.s_goal.set_rhs(0)
         self.eps = 2.5 # TODO
@@ -103,22 +103,22 @@ class AnytimeDstar:
     def __build_state__(self,s):
         if not self.G.has_key(s):
             self.G[s.point]= s
-        if s.succesors!=None:
+        if s.successors!=None:
             return
         values= state_trans_fuction(s.point,Ux,sX)
         hold_v = copy.deepcopy(values)
         for x in values:
             if x in forbidden:
                 hold_v.remove(x)
-        s.succesors = set()
+        s.successors = set()
         for x in values:
             newstate =None
             if self.G.has_key(x):
                 newstate = self.G[x]
             else:
-                newstate = state(x,self.start,self.goal)
+                newstate = State(x,self.start,self.goal)
                 self.G[x] = newstate
-            s.succesors.add(newstate)
+            s.successors.add(newstate)
           #if x in hold_v and x in forbidden:
            #   hold_v.remove(x)
               
@@ -140,13 +140,13 @@ class AnytimeDstar:
                 self.CLOSED.add(hold_state)
                 self.__build_state__(hold_state)
                 self.UpdateState(hold_state)
-                for aState in hold_state.succesors:
+                for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
             else:
                 hold_state.set_g(constants.INF)
                 hold_state.__build_state__(hold_state)
-                for aState in hold_state.succesors:
+                for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
 
