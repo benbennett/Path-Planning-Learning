@@ -18,28 +18,26 @@ import copy
 from state import State 
 import constants
 
-#x,y  grid 10x10
-sX =  numpy.zeros((4,4),dtype=numpy.int)
-#x,y action space
-Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
-#can move up down left right
-def state_trans_fuction(x,action_space,sX):
-    xy=numpy.array([
-                    [x[0],
-                     x[1] ]
-                    ])
-    asp= xy+action_space
-    mr=[]
-    for aC in asp:
-        valid=True
-        for i in range(0,2):
-            if not (aC[i]>=0 and aC[i]<sX.shape[i]):
-                valid=False
-        if valid==True:
-            mr.append((aC[0],aC[1]))
-    return mr
         
-
+class StateTranSpace:
+    def __init__(self,state_space,action_space):
+        self.sX = state_space 
+        self.Ux= action_space 
+    def state_trans_fuction(self,x):
+        xy=numpy.array([
+                        [x[0],
+                         x[1] ]
+                        ])
+        asp= xy+self.Ux
+        mr=[]
+        for aC in asp:
+            valid=True
+            for i in range(0,2):
+                if not (aC[i]>=0 and aC[i]<self.sX.shape[i]):
+                    valid=False
+            if valid==True:
+                mr.append((aC[0],aC[1]))
+        return mr
 class Key:
     """
     Used for the priority queue .
@@ -87,7 +85,7 @@ class AnytimeDstar:
     """
     Main portion of algorithm. 
     """
-    def __init__(self,start,goal,forbidden):
+    def __init__(self,start,goal,state_trans,forbidden=set()):
         self.OPEN = priorityDictionary()
         self.INCONS= set() 
         self.KEYS = priorityDictionary()
@@ -105,14 +103,14 @@ class AnytimeDstar:
         self.G = {} 
         self.forbidden = forbidden#TODO add "obstacles" 
         self.OPEN[self.s_goal] = self.keys(self.s_goal)
-
+        self.state_trans= state_trans
     def __build_state__(self,s):
         """ Utility method to build up a unvisited state"""
         if not self.G.has_key(s):
             self.G[s.point]= s
         if s.successors!=None:
             return
-        values= state_trans_fuction(s.point,Ux,sX)
+        values= self.state_trans.state_trans_fuction(s.point)
         hold_v = copy.deepcopy(values)
         for x in values:
             if x in forbidden:
