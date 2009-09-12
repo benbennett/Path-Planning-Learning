@@ -80,6 +80,8 @@ class Key:
         if self>o or self==o:
             return True
         return False
+    def __repr__(self):
+        return " ".join([str(self.k1)," ,",str(self.k2)])
 
 class AnytimeDstar:
     """
@@ -101,6 +103,7 @@ class AnytimeDstar:
         self.eps = 2.5 # TODO make it change during iterations. 
         self.PREC = {}
         self.G = {} 
+        self.G[self.s_start] = self.s_start
         self.forbidden = forbidden#TODO add "obstacles" 
         self.OPEN[self.s_goal] = self.keys(self.s_goal)
         self.state_trans= state_trans
@@ -124,7 +127,8 @@ class AnytimeDstar:
                 newstate = State(x,self.start,self.goal)
                 self.G[x] = newstate
             s.successors.add(newstate)
-        
+    def get_start(self):
+        return self.s_start
     def keys(self,s):  #state 
         if s.g()>s.rhs():
             return Key([ s.rhs() + self.eps*s.h(),s.rhs()])
@@ -132,6 +136,7 @@ class AnytimeDstar:
             return Key([ s.g() + s.h(),s.g()])
 
     def UpdateState(self,s):
+
         if not s.isGoal():
             s.set_rhs(s.min_of_successors())
         if s in self.OPEN :
@@ -141,11 +146,17 @@ class AnytimeDstar:
                 self.OPEN[s] = self.keys(s)
             else:
                 self.INCONS.add(s) 
+        if(s.point==self.s_start.point):
+            self.s_start = s
 
     def ComputeorImprovePath(self):
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \
-                or self.s_start.g()!= self.s_start.rhs()):
+             or self.s_start.g()!= self.s_start.rhs()):
+
+            #print self.keys(self.OPEN.smallest()) , "----",self.keys(self.s_start)
             hold_state = self.OPEN.smallest()
+            #TODO debug methods 
+            print hold_state.point
             self.OPEN.remove(hold_state)
             if hold_state.g() > hold_state.rhs():
                 hold_state.set_g(hold_state.rhs())
