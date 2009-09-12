@@ -173,13 +173,26 @@ class AnytimeDstar:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
 
-start=(0,0)
-goal=(3,3)
-forbidden= set()
 
-aDstart =  AnytimeDstar(start,goal,forbidden)
-aDstart.ComputeorImprovePath() 
-print aDstart.CLOSED
+if __name__== "__main__": 
+    start=(1,1)
+    goal=(15,3)
+    forbidden= set()
+
+    #x,y  grid 10x10
+    sX =  numpy.zeros((20,20),dtype=numpy.int)
+    #x,y action space
+    Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
+    state_trans = StateTranSpace(state_space=sX,action_space=Ux)
+    #can move up down left right
+    aDstart =  AnytimeDstar(start,goal,state_trans)
+    aDstart.ComputeorImprovePath() 
+    print aDstart.CLOSED
+
+    curP = aDstart.get_start()
+    while(curP!=None):
+        print curP
+        curP = curP.get_min_succesor()
 
 
 

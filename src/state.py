@@ -18,6 +18,11 @@ class State:
         self.successors = None #Set of all successors of the state 
     def __hash__(self):
         return self.point.__hash__()
+    def get_min_succesor(self):
+        if(self.point == self.goal):
+            return None 
+        self.min_of_successors()
+        return self.min_succ
     def min_of_successors(self):
         """
         Used to compute the rhs(s) (see pg 2 of pdf)
@@ -27,11 +32,12 @@ class State:
         """
         min = None
         for aS in self.successors:
-            if min==None :
+            if min==None:
                 min =self.csprime_gsprime(aS)
+                self.min_succ = aS
             elif min> self.csprime_gsprime(aS):
                 min = self.csprime_gsprime(aS)
-        self.min_succ= min
+                self.min_succ= aS 
         return min
     def rhs(self):
         """One-step lookahead cost rhs(s)"""
@@ -73,3 +79,5 @@ class State:
     def isGoal(self):
         return self.point == self.goal
 
+    def __repr__(self):
+        return str(self.point)
