@@ -14,12 +14,15 @@ import numpy
 import math
 from priodict import priorityDictionary
 import copy
+#local modules
+from state import state
+import constants
+
 #x,y  grid 10x10
 sX =  numpy.zeros((4,4),dtype=numpy.int)
 #x,y action space
 Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
 #can move up down left right
-INF=1000000.0 
 def state_trans_fuction(x,action_space,sX):
     xy=numpy.array([
                     [x[0],
@@ -37,45 +40,6 @@ def state_trans_fuction(x,action_space,sX):
     return mr
         
 
-
-class state:
-    def __init__(self,tuple_point,start,goal):
-        self.point = tuple_point
-        self.start= start
-        self.goal = goal
-        self.gofs= INF 
-        self.rhs_value=None
-        self.min_succ=None
-        self.succesors = None 
-    def __hash__(self):
-        return self.point.__hash__()
-    def min_of_successors(self):
-        min = None
-        for aS in self.succesors:
-            if min==None :
-                min =self.csprime_gsprime(aS)
-            elif min> self.csprime_gsprime(aS):
-                min = self.csprime_gsprime(aS)
-        self.min_succ= min
-        return min
-    def rhs(self):# one-step lookahead cost rhs(s)
-            return self.rhs_value 
-    def set_rhs(self,rhs):
-        self.rhs_value=rhs
-    def csprime_gsprime(self,sprime):
-        return self.cost(sprime.point)+sprime.g()
-    def cost(self,sprime):
-        return 1
-    def g(self):#estimated cost of moving from state s(including previous
-                #states) to the goal
-        return self.gofs     
-        #abs((self.goal[0]-self.point[0]))+abs((self.goal[1]-self.point[1]))
-    def set_g(self,g):
-        self.gofs= g
-    def h(self):
-        return abs((self.start[0]-self.point[0]))+abs((self.start[1]-self.point[1]))
-    def isGoal(self):
-        return self.point == self.goal
 class Key:
     def __init__(self,an_array=[0,0]):
         self.k1= an_array[0]
@@ -108,10 +72,10 @@ class AnytimeDstar:
         self.start=start
         self.goal=goal
         self.s_start = state(start,start,goal)
-        self.s_start.set_rhs(INF)
-        self.s_start.set_g(INF)
+        self.s_start.set_rhs(constants.INF)
+        self.s_start.set_g(constants.INF)
         self.s_goal = state(goal,start,goal)
-        self.s_goal.set_g(INF)
+        self.s_goal.set_g(constants.INF)
         self.s_goal.set_rhs(0)
         self.eps = 2.5 # TODO
         self.PREC = {}
@@ -180,7 +144,7 @@ class AnytimeDstar:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
             else:
-                hold_state.set_g(INF)
+                hold_state.set_g(constants.INF)
                 hold_state.__build_state__(hold_state)
                 for aState in hold_state.succesors:
                     self.__build_state__(aState)
