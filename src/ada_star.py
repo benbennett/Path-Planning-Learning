@@ -1,3 +1,15 @@
+"""
+Simple implementation of
+"Anytime Dynamic A*: An Anytime, Replanning Algorithm" by
+Maxim Likhachev , Dave Ferguson , Geoff Gordon , Anthony Stentz , and Sebastian Thrun
+
+Warning this may be incorrect, mainly put together to learn from there paper.
+See paper at: 
+http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005_1.pdf
+
+
+"""
+
 import numpy
 import math
 from priodict import priorityDictionary
