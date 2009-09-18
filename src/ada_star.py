@@ -131,7 +131,8 @@ class AnytimeDstar:
             return Key([ s.g() + s.h(),s.g()])
 
     def UpdateAllPriorities(self):
-        for s in self.OPEN:
+        states= [s for s in self.OPEN]
+        for s in states:
             self.OPEN[s] = self.keys(s)
     def UpdateState(self,s):
 
