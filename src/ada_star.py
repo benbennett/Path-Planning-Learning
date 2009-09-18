@@ -92,8 +92,6 @@ class AnytimeDstar:
         self.INCONS= set() 
         self.KEYS = priorityDictionary()
         self.CLOSED = set()
-        self.start=start
-        self.goal=goal
         self.s_start = State(start,start,goal)
         self.s_start.set_rhs(constants.INF)
         self.s_start.set_g(constants.INF)
@@ -124,7 +122,7 @@ class AnytimeDstar:
             if self.G.has_key(x):
                 newstate = self.G[x]
             else:
-                newstate = State(x,self.start,self.goal)
+                newstate = State(x,self.s_start.start,self.s_goal.goal)
                 self.G[x] = newstate
             s.successors.add(newstate)
     def get_start(self):

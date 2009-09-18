@@ -8,7 +8,7 @@ class State:
     g(s) > rhs(s)) or underconsistent (if g(s) < rhs(s))'
  
     """
-    def __init__(self,tuple_point,start,goal):
+    def __init__(self,tuple_point=(0,0),start=(0,0),goal=(0,0)):
         self.point = tuple_point
         self.start= start    
         self.goal = goal
