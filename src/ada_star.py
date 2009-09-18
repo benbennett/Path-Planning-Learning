@@ -168,7 +168,13 @@ class AnytimeDstar:
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
-
+    def getPath(self):
+        curP = aDstart.get_start()
+        path = [] 
+        while(curP!=None):
+            path.append(curP)
+            curP = curP.get_min_succesor()
+        return path
 
 if __name__== "__main__": 
     start=(1,1)
@@ -184,10 +190,7 @@ if __name__== "__main__":
     aDstart =  AnytimeDstar(start,goal,state_trans)
     aDstart.ComputeorImprovePath() 
     aDstart.UpdateAllPriorities()
-    curP = aDstart.get_start()
-    while(curP!=None):
-        print curP
-        curP = curP.get_min_succesor()
+    print aDstart.getPath()
 
 
 
