@@ -165,7 +165,7 @@ class AnytimeDstar:
                     self.UpdateState(aState)
             else:
                 hold_state.set_g(constants.INF)
-                hold_state.__build_state__(hold_state)
+                self.__build_state__(hold_state)
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
