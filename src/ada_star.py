@@ -169,7 +169,7 @@ class AnytimeDstar:
 
 if __name__== "__main__": 
     start=(1,1)
-    goal=(15,3)
+    goal=(10,10)
     forbidden= set()
 
     #x,y  grid 10x10
@@ -180,7 +180,6 @@ if __name__== "__main__":
     #can move up down left right
     aDstart =  AnytimeDstar(start,goal,state_trans)
     aDstart.ComputeorImprovePath() 
-    print aDstart.CLOSED
 
     curP = aDstart.get_start()
     while(curP!=None):
