@@ -107,7 +107,7 @@ class AnytimeDstar:
     def __build_state__(self,s):
         """ Utility method to build up a unvisited state"""
         if not self.G.has_key(s):
-            self.G[s.point]= s
+            self.G[s]= s
         if s.successors!=None:
             return
         values= self.state_trans.state_trans_fuction(s.point)
@@ -117,12 +117,10 @@ class AnytimeDstar:
                 hold_v.remove(x)
         s.successors = set()
         for x in values:
-            newstate =None
-            if self.G.has_key(x):
-                newstate = self.G[x]
-            else:
-                newstate = State(x,self.s_start.start,self.s_goal.goal)
-                self.G[x] = newstate
+            newstate = State(x,self.s_start.point,self.s_goal.point)
+            if self.G.has_key(newstate):
+                newstate = self.G[newstate]
+            self.G[newstate]= newstate
             s.successors.add(newstate)
     def get_start(self):
         return self.s_start
@@ -143,8 +141,6 @@ class AnytimeDstar:
                 self.OPEN[s] = self.keys(s)
             else:
                 self.INCONS.add(s) 
-        if(s.point==self.s_start.point):
-            self.s_start = s
 
     def ComputeorImprovePath(self):
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \

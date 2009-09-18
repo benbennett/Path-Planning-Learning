@@ -81,3 +81,6 @@ class State:
 
     def __repr__(self):
         return str(self.point)
+
+    def __eq__(self,o):
+        return self.point == o.point 
