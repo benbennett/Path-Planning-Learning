@@ -39,6 +39,10 @@ class State:
                 min = self.csprime_gsprime(aS)
                 self.min_succ= aS 
         return min
+    def remove_successor(self,s):
+        if s in self.successors:
+            self.successors.remove(s)
+        self.min_of_successors()
     def rhs(self):
         """One-step lookahead cost rhs(s)"""
         return self.rhs_value 

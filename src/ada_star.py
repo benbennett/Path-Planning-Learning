@@ -175,10 +175,31 @@ class AnytimeDstar:
             path.append(curP)
             curP = curP.get_min_succesor()
         return path
-
+    def addForbidden(self,point):
+        if point in self.forbidden:
+            return 
+        self.forbidden.add(point)
+        state = State(point)
+        if self.G.has_key(state):
+            state = self.G[state]
+        else:
+            return
+        toUpdate = []
+        for aS in state.successors:
+            aS.remove_successor(state)
+            if aS in self.CLOSED:
+                self.CLOSED.remove(aS)
+            toUpdate.append(aS)
+        for aS in toUpdate:
+            self.UpdateState(aS)
+            aS.min_of_successors()
+    def moveAllFromIncsToOpen(self):
+        for aS in self.INCONS:
+            self.OPEN[aS] = self.keys(aS)
+        self.INCONS = set()
 if __name__== "__main__": 
     start=(1,1)
-    goal=(10,10)
+    goal=(4,4)
     forbidden= set()
 
     #x,y  grid 10x10
@@ -189,8 +210,9 @@ if __name__== "__main__":
     #can move up down left right
     aDstart =  AnytimeDstar(start,goal,state_trans)
     aDstart.ComputeorImprovePath() 
-    aDstart.UpdateAllPriorities()
     print aDstart.getPath()
-
-
-
+    aDstart.addForbidden((2,2))
+    aDstart.moveAllFromIncsToOpen()
+    aDstart.UpdateAllPriorities()
+    aDstart.ComputeorImprovePath() 
+  #  print aDstart.getPath()
