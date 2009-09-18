@@ -153,7 +153,6 @@ class AnytimeDstar:
             #print self.keys(self.OPEN.smallest()) , "----",self.keys(self.s_start)
             hold_state = self.OPEN.smallest()
             #TODO debug methods 
-            print hold_state.point
             self.OPEN.remove(hold_state)
             if hold_state.g() > hold_state.rhs():
                 hold_state.set_g(hold_state.rhs())
@@ -169,6 +168,7 @@ class AnytimeDstar:
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
+                
     def getPath(self):
         curP = aDstart.get_start()
         path = [] 
@@ -213,7 +213,12 @@ if __name__== "__main__":
     aDstart.ComputeorImprovePath() 
     print aDstart.getPath()
     aDstart.addForbidden((2,2))
+    aDstart.ComputeorImprovePath() 
+    print aDstart.getPath()
+    
+    aDstart.addForbidden((3,3))
+    print aDstart.getPath()
     aDstart.moveAllFromIncsToOpen()
     aDstart.UpdateAllPriorities()
     aDstart.ComputeorImprovePath() 
-  #  print aDstart.getPath()
+    print aDstart.getPath()
