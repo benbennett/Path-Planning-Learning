@@ -130,6 +130,9 @@ class AnytimeDstar:
         else:
             return Key([ s.g() + s.h(),s.g()])
 
+    def UpdateAllPriorities(self):
+        for s in self.OPEN:
+            self.OPEN[s] = self.keys(s)
     def UpdateState(self,s):
 
         if not s.isGoal():
@@ -180,7 +183,7 @@ if __name__== "__main__":
     #can move up down left right
     aDstart =  AnytimeDstar(start,goal,state_trans)
     aDstart.ComputeorImprovePath() 
-
+    aDstart.UpdateAllPriorities()
     curP = aDstart.get_start()
     while(curP!=None):
         print curP
