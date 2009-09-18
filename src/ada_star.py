@@ -90,7 +90,6 @@ class AnytimeDstar:
     def __init__(self,start,goal,state_trans,forbidden=set()):
         self.OPEN = priorityDictionary()
         self.INCONS= set() 
-        self.KEYS = priorityDictionary()
         self.CLOSED = set()
         self.s_start = State(start,start,goal)
         self.s_start.set_rhs(constants.INF)
