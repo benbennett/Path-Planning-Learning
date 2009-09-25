@@ -12,43 +12,43 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 namespace  planning 
 {
 	template <typename Z , typename R>
-		class state
+		class State
 		{
 			public: 
 				typedef std::vector<Z> tuple;	
 			private:
 				tuple point;
 				/*tuple goal;
-				R rhs_value;
-				R gofs;
-				*/
+				  R rhs_value;
+				  R gofs;
+				  */
 			public:
-				state();
+				State();
 				/*   
 				 *
 				 */
-				void init(tuple pos, const tuple & goal );
-				
+				void init(tuple pos, const tuple & goal);
+
 				/*
 				 * Going to be used in the hash function for map methods 
 				 */
 				long hash();
 
-				state get_min_successor();
+				State getMinSuccessor();
 
-				void remove_successor(state const & s); 
+				void removeSuccessor(State const & s); 
 
 				void rhs();
 
-				void set_rhs(R);
+				void setRhs(R);
 
-				void csprime_gsprime(state const & sprime );
+				void csprimeGsprime(State const & sprime );
 
-				R cost(state & sprime);
+				R cost(State & sprime);
 
 				R g();
 
-				void set_g(R g );
+				void setG(R g );
 
 				R  h();
 
@@ -66,7 +66,7 @@ namespace  planning
 
 			public:
 
-				std::vector< state<Z,R> > StateTranFunc(state<Z,R> at, std::vector< Z [2] >);
+				std::vector< State<Z,R> > StateTranFunc(State<Z,R> at, std::vector< Z [2] >);
 
 
 		};

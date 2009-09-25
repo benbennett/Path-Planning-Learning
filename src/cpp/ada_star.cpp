@@ -1,64 +1,64 @@
 #include "ada_star.hpp"
 namespace planning{
 
-		template <typename Z , typename R>state<Z,R>::state()
+		template <typename Z , typename R>State<Z,R>::State()
 		{
 		}
 		/*   
 		 *
 		 */
-		template <typename Z , typename R>void state<Z,R>::init(tuple pos, const tuple & goal )
+		template <typename Z , typename R>void State<Z,R>::init(tuple pos, const tuple & goal)
 		{
 		}
 		/*
 		 * Going to be used in the hash function for map methods 
 		 */
-		template <typename Z , typename R>long state<Z,R>::hash()
+		template <typename Z , typename R>long State<Z,R>::hash()
 		{
 		}
-		template <typename Z , typename R>state<Z,R> state<Z,R>::get_min_successor()
+		template <typename Z , typename R>State<Z,R> State<Z,R>::getMinSuccessor()
 		{ 
-			state<Z,R> mr;	
+			State<Z,R> mr;	
 			return mr;
 		}
-		template <typename Z , typename R>void state<Z,R>::remove_successor(state const & s) 
+		template <typename Z , typename R>void State<Z,R>::removeSuccessor(State const & s) 
 		{
 		}
 
-		template <typename Z , typename R>void state<Z,R>::rhs()
+		template <typename Z , typename R>void State<Z,R>::rhs()
 		{
 		}
 
-		template <typename Z , typename R>void state<Z,R>::set_rhs(R)
+		template <typename Z , typename R>void State<Z,R>::setRhs(R)
 		{
 		}
 
-		template <typename Z , typename R>void state<Z,R>::csprime_gsprime(state const & sprime )
+		template <typename Z , typename R>void State<Z,R>::csprimeGsprime(State const & sprime)
 		{
 		}
 
-		template <typename Z , typename R> R state<Z,R>::cost(state & sprime)
+		template <typename Z , typename R> R State<Z,R>::cost(State & sprime)
 		{
 		}
 
-		template <typename Z , typename R>R state<Z,R>::g()
+		template <typename Z , typename R>R State<Z,R>::g()
 		{
 		}
 
-		template <typename Z , typename R>void state<Z,R>::set_g(R g )
+		template <typename Z , typename R>void State<Z,R>::setG(R g )
 		{
 		}
 
-		template <typename Z , typename R>R  state<Z,R>::h()
+		template <typename Z , typename R>R  State<Z,R>::h()
 		{
 		}
 
-		template <typename Z , typename R>bool state<Z,R>::isGoal()
+		template <typename Z , typename R>bool State<Z,R>::isGoal()
 		{
 		}
 
 		template <typename Z , typename R>
-			std::vector< state<Z,R> > StateTransSpace<Z,R>::StateTranFunc(state<Z,R> at, std::vector< Z [2] >)
+			std::vector< State<Z,R> > StateTransSpace<Z,R>::StateTranFunc(State<Z,R> at, std::vector< Z [2] >)
 		{
 
 		}
