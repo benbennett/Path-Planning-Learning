@@ -9,7 +9,9 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 */
 
 #include <vector> 
+#include <iterator>
 #include <boost/shared_ptr.hpp>
+#include <boost/functional/hash.hpp>
 namespace  planning 
 {
 	const double INF=10000000.0;
@@ -40,6 +42,14 @@ namespace  planning
 				 */
 				void init(tuple pos, boost::shared_ptr<tuple>  goal)
 				{
+
+				}
+				friend std::size_t  hash_value(State<Z,R> const & in)
+				{
+					std::size_t seed=0;
+					boost::hash_combine(seed,in.point[0]);
+					boost::hash_combine(seed,in.point[1]);
+					return 0;
 
 				}
 
@@ -108,10 +118,18 @@ namespace  planning
 				}
 				//TODO over load ostream operator and == operator
 
-				bool operator==(const State  & rhs);
+				bool operator==(State<Z,R> const & rhs) const
+				{
+					return rhs.point== this->point;
+				}
+
+				friend std::ostream& operator << (std::ostream& os, const State<Z,R>& in)
+				{
+					os<<"(";
+					std::copy(in.point.begin(),in.point.end(),std::ostream_iterator <R>(os,","));	
+					os<<")";
+				}
 		};
-	template<typename Z, typename R> 
-		std::size_t  hash_value(State<Z,R> const & in);
 
 
 	template<typename Z, typename R> 
