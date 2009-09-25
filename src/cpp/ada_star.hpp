@@ -57,4 +57,36 @@ namespace  planning
 
 		};
 
+	template<typename Z, typename R> 
+		class StateTransSpace 
+		{
+			public:
+				StateTransSpace();
+			private:
+
+			public:
+
+				std::vector< state<Z,R> > StateTranFunc(state<Z,R> at, std::vector< Z [2] >);
+
+
+		};
+
+	template<typename Z, typename R> 
+		class Key 
+		{
+			public:
+				Key();
+				Key(R k1, R k2);
+			private:
+				R k1;
+				R k2;
+			public:
+				//simple overload of operators 
+				bool operator==(const Key &rhs);
+				bool operator>=(const Key &rhs);
+				bool operator<=(const Key &rhs);
+				bool operator!=(const Key &rhs);
+				bool operator>(const Key &rhs);
+				bool operator<(const Key &rhs);
+		};
 }

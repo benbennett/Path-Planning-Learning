@@ -56,4 +56,52 @@ namespace planning{
 		template <typename Z , typename R>bool state<Z,R>::isGoal()
 		{
 		}
+
+		template <typename Z , typename R>
+			std::vector< state<Z,R> > StateTransSpace<Z,R>::StateTranFunc(state<Z,R> at, std::vector< Z [2] >)
+		{
+
+		}
+		template <typename Z , typename R>StateTransSpace<Z,R>::StateTransSpace()
+		{
+
+		}
+
+		template< typename Z, typename R> bool Key<Z,R>::operator==(const Key &rhs)
+		{
+			if(k1==rhs->k1 && k2==rhs->k2)
+				return true;
+			return false;
+		}
+		template< typename Z, typename R> bool Key<Z,R>::operator>=(const Key &rhs)
+		{
+			if(this>rhs || this==rhs)
+				true;
+			return false;
+		}
+		template< typename Z, typename R> bool Key<Z,R>::operator<=(const Key &rhs)
+		{
+			if (this < rhs || this=rhs)
+				return true;
+			return false;
+		}
+		template< typename Z, typename R> bool Key<Z,R>::operator!=(const Key &rhs)
+		{
+			if(this==rhs)
+				return false;
+			return true;
+		}
+		template< typename Z, typename R> bool Key<Z,R>::operator>(const Key &rhs)
+		{	
+			return !(this<rhs);
+		}
+		template< typename Z, typename R> bool Key<Z,R>::operator<(const Key &rhs)
+		{
+			if(k1< rhs->k1)
+				return true;
+			if(k1==rhs->k1 && k1<rhs->k2)
+			   return true;	
+			return false;
+		}
+
 }
