@@ -10,32 +10,39 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 
 #include <vector> 
 #include <iterator>
+#include <boost/unordered_set.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 namespace  planning 
 {
 	const double INF=10000000.0;
-
+	using namespace boost;
 	template <typename Z , typename R>
 		class State
 		{
 			public: 
 				typedef std::vector<Z> tuple;
-
+				
 			private:
 				tuple point;
 				tuple goal;
 				R rhs_value;
 				R gofs;
-
+				//Have to use a pointer , otherwise it is incomplete type. 
+				//IE doesn't know how to istatinate a instance 
+				//Little confusing , dynamic 
+				//
+				unordered_set< State<Z,R> >successors_;
+				shared_ptr<  State<Z,R> >min_successor_;
+				shared_ptr< State<Z,R> >goal_;
 			public:
 				State()
 				{
-
+					
 				}
-				State(tuple in)
+				State(tuple pos)
 				{
-					this->point= in;
+					this->point= pos;
 				}
 				/*   
 				 *
@@ -52,15 +59,6 @@ namespace  planning
 					return 0;
 
 				}
-
-				/*
-				 * Going to be used in the hash function for map methods 
-				 */
-				long hash()
-				{
-					return 0;
-				}
-
 
 				State getMinSuccessor()
 				{
@@ -120,7 +118,7 @@ namespace  planning
 
 				bool operator==(State<Z,R> const & rhs) const
 				{
-					return rhs.point== this->point;
+					return rhs.point==this->point;
 				}
 
 				friend std::ostream& operator << (std::ostream& os, const State<Z,R>& in)
