@@ -24,10 +24,9 @@ namespace  planning
 				typedef std::vector<Z> tuple;
 				
 			private:
-				tuple point;
-				tuple goal;
-				R rhs_value;
-				R gofs;
+				tuple point_;
+				R rhs_value_;
+				R gofs_;
 				//Have to use a pointer , otherwise it is incomplete type. 
 				//IE doesn't know how to istatinate a instance 
 				//Little confusing , dynamic 
@@ -42,7 +41,7 @@ namespace  planning
 				}
 				State(tuple pos)
 				{
-					this->point= pos;
+					this->point_= pos;
 				}
 				/*   
 				 *
@@ -54,8 +53,8 @@ namespace  planning
 				friend std::size_t  hash_value(State<Z,R> const & in)
 				{
 					std::size_t seed=0;
-					boost::hash_combine(seed,in.point[0]);
-					boost::hash_combine(seed,in.point[1]);
+					boost::hash_combine(seed,in.point_[0]);
+					boost::hash_combine(seed,in.point_[1]);
 					return 0;
 
 				}
@@ -118,13 +117,13 @@ namespace  planning
 
 				bool operator==(State<Z,R> const & rhs) const
 				{
-					return rhs.point==this->point;
+					return rhs.point_==this->point_;
 				}
 
 				friend std::ostream& operator << (std::ostream& os, const State<Z,R>& in)
 				{
 					os<<"(";
-					std::copy(in.point.begin(),in.point.end(),std::ostream_iterator <R>(os,","));	
+					std::copy(in.point_.begin(),in.point_.end(),std::ostream_iterator <R>(os,","));	
 					os<<")";
 				}
 		};
