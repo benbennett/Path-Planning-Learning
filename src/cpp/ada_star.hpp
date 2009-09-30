@@ -188,7 +188,7 @@ namespace  planning
 		class Key 
 		{
 			public:
-				Key( shared_ptr < State < Z , R >  > const & s,R  eps)
+				Key( shared_ptr < State < Z , R >  >  s,R  eps)
 				{
 					state_ = s;
 					if( s->g()> s->rhs())
@@ -410,7 +410,10 @@ namespace  planning
 					if(closed_.find(s->getPoint())== closed_.end())
 					{
 						s->in_queue_ = true;
-						//TODO FIX me open_.push( key_def(s,eps_));
+						assert(s->getSuccessors().size()>0);
+						key_def hold(s,eps_);
+						assert(hold.getState()->getSuccessors().size()>0);
+						open_.push(hold); 
 					}
 					else
 						incons_[s->getPoint()] = s;
