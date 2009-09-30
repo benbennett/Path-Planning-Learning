@@ -362,6 +362,7 @@ namespace  planning
 					temp_ptr->setGoal(temp_ptr);
 				else
 					temp_ptr->setGoal(goal_);
+				states_[point] = temp_ptr;
 				return temp_ptr;
 			}
 
