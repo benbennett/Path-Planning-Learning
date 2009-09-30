@@ -328,7 +328,7 @@ namespace  planning
 				key_def goal_key(goal_,eps_);
 				open_.push(goal_key);
 			}	
-			void setStart( shared_state_def start)
+			void setStart( const shared_state_def & start)
 			{
 				start_ = start;
 			}
@@ -366,7 +366,7 @@ namespace  planning
 				return temp_ptr;
 			}
 
-			void  buildState( shared_state_def in)
+			void  buildState( shared_state_def & in)
 			{
 				if(in->getSuccessors().size()==0)
 				{
@@ -399,7 +399,7 @@ namespace  planning
 				}
 				open_= newqueue;
 			}
-			void UpdateState( shared_state_def s)
+			void UpdateState( shared_state_def & s)
 			{
 				if( !(s->isGoal()))
 					s->setRhs(s->getMinSuccessorValue());
@@ -471,8 +471,6 @@ namespace  planning
 
 							hold_update_state = succ_iter->second;
 							buildState(hold_update_state);
-					/*		assert(hold_update_state->getSuccessors().size()>0);
-					*/
 							UpdateState(hold_update_state);
 							succ_iter++;
 						}
