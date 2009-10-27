@@ -21,7 +21,7 @@ namespace  planning
 {
 	const double INF=10000000.0;
 	using namespace boost;
-
+	using namespace std;
 	template <typename Z , typename R>
 		class State
 		{
@@ -39,6 +39,7 @@ namespace  planning
 				std::map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
 				shared_ptr<  State<Z,R> >min_successor_;
 				R min_successor_value_;
+				shared_ptr< State<Z,R> >start_;
 				shared_ptr< State<Z,R> >goal_;
 				void clear()
 				{
@@ -62,14 +63,26 @@ namespace  planning
 					this->point_= pos;
 
 				}
-				State(tuple pos, boost::shared_ptr< State <Z,R> >  goal):successors_()
+				State(boost::shared_ptr< State <Z,R> >  goal,tuple pos){
+
+					in_queue_= false;
+					clear();
+					goal_  = goal;
+				}
+				State(tuple pos, boost::shared_ptr< State <Z,R> >  start,boost::shared_ptr< State <Z,R> >  goal):successors_()
 				{
 					in_queue_= false;
 					clear();
+					start_ = start;
 					point_ = pos;
 					goal_  = goal;
 				}
-				void setGoal(boost::shared_ptr< State <Z,R> >  goal)
+				void setStart(boost::shared_ptr< State <Z,R> > & start)
+				{
+					start_ = start;
+				}
+
+				void setGoal(boost::shared_ptr< State <Z,R> > & goal)
 				{
 					goal_ = goal;
 				}
@@ -134,7 +147,7 @@ namespace  planning
 					rhs_value_ = in; 	
 				}
 
-				R csprimeGsprime(State<Z,R> & sprime ) 
+				R csprimeGsprime(State<Z,R>  & sprime  ) 
 				{
 					return R( cost(sprime) + sprime.g() ) ;
 				}
@@ -156,12 +169,27 @@ namespace  planning
 
 				R  h()
 				{
-					R mr=0;
+					assert(goal_!=NULL);
+					assert(start_!=NULL);
+					R mr=-1;
+					R max =-1;
 					for(int i=0;i<2;i++)
 					{
 						mr = std::abs(goal_->point_[i] - point_[i]);
+						if(mr>max)
+							max=mr;
 					}	
-					return mr;
+					mr=-1;
+					R max2 =-1;
+					for(int i=0;i<2;i++)
+					{
+						mr = std::abs(start_->point_[i] - point_[i]);
+						if(mr>max2)
+							max2=mr;
+					}
+					max+=max2;
+					
+					return max+max2;
 				}
 				std::vector<Z> getPoint()
 				{
@@ -181,6 +209,7 @@ namespace  planning
 					os<<"(";
 					std::copy(in.point_.begin(),in.point_.end(),std::ostream_iterator <R>(os,","));	
 					os<<")";
+					return os;
 				}
 		};
 
@@ -202,20 +231,42 @@ namespace  planning
 						k2 = s->g();
 					}			
 				}
-
-				Key( Key<Z,R>  const & other,R  eps)
+				Key( Key<Z,R> const  & other)
 				{
 					state_ = other.state_;
 
-					if( state_ ->g()> state_ ->rhs())
+					k1 = other.k1; 
+					k2 = other.k2; 
+				}
+
+				Key( Key<Z,R>   &  other,R  eps)
+				{
+					state_ = other.state_;
+					if( state_->g()> state_->rhs())
 					{
-						k1 = state_ ->rhs()+eps*state_ ->h();
+						k1 = state_ ->rhs()+eps*(state_->h());
 						k2 = state_ ->rhs();
 					}
 					else
 					{
-						k1 = state_ ->g()+ state_ ->h();
-						k2 = state_ ->g();
+						k1 = state_->g()+ state_->h();
+						k2 = state_->g();
+					}			
+				}
+
+				Key( Key<Z,R>  const &  other,R  eps)
+				{
+					state_ = other.state_;
+
+					if( state_->g()> state_->rhs())
+					{
+						k1 = state_ ->rhs()+eps*(state_->h());
+						k2 = state_ ->rhs();
+					}
+					else
+					{
+						k1 = state_->g()+ state_->h();
+						k2 = state_->g();
 					}			
 				}
 				Key()
@@ -284,10 +335,12 @@ namespace  planning
 					k1 = rhs.k1;
 					k2 = rhs.k2;
 					state_ = rhs.state_;
+					return (*this);
 				}
 				friend std::ostream& operator << (std::ostream& os, const Key<Z,R>& in)
 				{
-					os<<in.k1 <<","<<in.k2;	
+					os<<in.k1 <<","<<in.k2 << " "<<*in.state_;
+					return os;	
 				}
 		};
 
@@ -315,17 +368,21 @@ namespace  planning
 				eps_=3.0;
 			}
 			AnytimeDstar(Z first, Z second):states_(),open_(),closed_(),incons_()
-
 			{
+				eps_=3.0;
 				shared_state_def hold = createState(first,second);
 				goal_ = hold;	
 			}
 			void init(shared_state_def start)
 			{
+				eps_=3.0;
 				start_  = start;
+				start_->setGoal(goal_);
+				goal_->setStart(goal_);
 				goal_->setRhs(0);
 				goal_->in_queue_=true;	
 				key_def goal_key(goal_,eps_);
+
 				open_.push(goal_key);
 			}	
 			void setStart( const shared_state_def & start)
@@ -360,8 +417,14 @@ namespace  planning
 				temp_ptr.reset(new state_def(point));
 				if(goal_==NULL)
 					temp_ptr->setGoal(temp_ptr);
-				else
+				else{
 					temp_ptr->setGoal(goal_);
+				}
+				if(start_==NULL)
+					temp_ptr->setStart(temp_ptr);
+				else{
+					temp_ptr->setStart(start_);
+				}
 				states_[point] = temp_ptr;
 				return temp_ptr;
 			}
@@ -390,7 +453,7 @@ namespace  planning
 			void UpdateAllPriorities()
 			{
 
-				std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def > > newqueue;
+				std::priority_queue< key_def, std::vector< key_def  >,std::less< key_def > > newqueue;
 				while(!open_.empty())
 				{
 					key_def hold = open_.top();
@@ -414,7 +477,8 @@ namespace  planning
 						assert(s->getSuccessors().size()>0);
 						key_def hold(s,eps_);
 						assert(hold.getState()->getSuccessors().size()>0);
-						open_.push(hold); 
+						open_.push(hold);
+					    	
 					}
 					else
 						incons_[s->getPoint()] = s;
@@ -428,7 +492,7 @@ namespace  planning
 					return false;
 				while(!open_.empty()) 
 				{
-					key_def hold = open_.top();
+					key_def hold(open_.top());
 					if(hold.getState()->in_queue_==false)
 						open_.pop();
 					else
@@ -438,13 +502,14 @@ namespace  planning
 					return false;
 				return true;	
 			}
-			void ComputeorImprovePath()
+			int ComputeorImprovePath()
 			{
 				key_def hold_key;
 				shared_state_def hold_state;
 				shared_state_def hold_update_state;
 				typename std::map< std::vector<Z>, shared_state_def >::iterator  succ_iter;				
 				typename std::map< std::vector<Z>, shared_state_def > hold_map;	
+				int states = 0;
 				while( filterQueue() && 
 							( key_def(open_.top(),eps_)
 							  < key_def(start_,eps_)
@@ -452,8 +517,9 @@ namespace  planning
 				{
 					hold_key =  open_.top();
 					hold_state = hold_key.getState();	
-					hold_state->in_queue_=false;	
+					hold_state->in_queue_=false;
 					open_.pop();
+					states++;
 					if( hold_state->g() > hold_state->rhs())
 					{
 						hold_state->setG(hold_state->rhs());
@@ -468,7 +534,6 @@ namespace  planning
 							hold_update_state = succ_iter->second;
 							assert(succ_iter->second!=NULL);
 							assert(succ_iter->second!=NULL);
-
 							hold_update_state = succ_iter->second;
 							buildState(hold_update_state);
 							UpdateState(hold_update_state);
@@ -491,8 +556,8 @@ namespace  planning
 						}
 					}
 					
-				}	
-
+				}
+				return states;
 			}
 
 		};

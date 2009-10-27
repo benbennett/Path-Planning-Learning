@@ -16,19 +16,11 @@ using namespace std;
 using namespace planning;
 int main()
 {
-	shared_ptr<int> foo1;
-	shared_ptr<int> foo2;
-	foo1.reset(new int(1));
 
-	foo2 = foo1;
-	cout<< *foo1;
-	*foo2 = 221;
-	cout<<endl<< *foo1 <<endl;
-	assert( foo1.get()==foo2.get());
-	testStateClass();
-	testAnytimeDstarSimple();
+//	testStateClass();
+//	testAnytimeDstarSimple();
 	testAnytimeDstar();
-	testKeyClass();	
+//	testKeyClass();	
 	return 0;
 }
 void testKeyClass()
@@ -98,7 +90,7 @@ void testStateClass()
 	int s_pt[] = {0,0};
 	std::vector<int> start_pt(s_pt,s_pt+2);
 	shared_ptr<	State<int,double> > start_ptr;
-	start_ptr.reset( new State<int,double> (start_pt,goal_ptr));
+	start_ptr.reset( new State<int,double> (start_pt));
   	
 	assert(goal_ptr->isGoal()==true);
   	assert(start_ptr->g()==planning::INF);
@@ -147,8 +139,8 @@ void testAnytimeDstar()
 	typedef  State<int,double> aState;
 	typedef  AnytimeDstar<int,double> ADStar_def;
 	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar(3,3);
-	shared_state_def start = adstar.createState(0,0);
+	ADStar_def adstar(100,100);
+	shared_state_def start = adstar.createState(1,1);
 	adstar.init(start);
-	adstar.ComputeorImprovePath();
+    cout<<adstar.ComputeorImprovePath()<<endl;
 }
