@@ -91,7 +91,7 @@ namespace  planning
 					std::size_t seed=0;
 					boost::hash_combine(seed,in.point_[0]);
 					boost::hash_combine(seed,in.point_[1]);
-					return 0;
+					return seed;
 
 				}
 			
