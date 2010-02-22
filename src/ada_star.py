@@ -147,12 +147,14 @@ class AnytimeDstar:
                 self.INCONS.add(s) 
 
     def ComputeorImprovePath(self):
+        states = 0
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \
              or self.s_start.g()!= self.s_start.rhs()):
 
             #print self.keys(self.OPEN.smallest()) , "----",self.keys(self.s_start)
             hold_state = self.OPEN.smallest()
             #TODO debug methods 
+            states+=1 
             self.OPEN.remove(hold_state)
             if hold_state.g() > hold_state.rhs():
                 hold_state.set_g(hold_state.rhs())
@@ -168,7 +170,7 @@ class AnytimeDstar:
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
-                
+        print states 
     def getPath(self):
         curP = aDstart.get_start()
         path = [] 
@@ -200,11 +202,11 @@ class AnytimeDstar:
         self.INCONS = set()
 if __name__== "__main__": 
     start=(1,1)
-    goal=(4,4)
+    goal=(11,11)
     forbidden= set()
 
     #x,y  grid 10x10
-    sX =  numpy.zeros((20,20),dtype=numpy.int)
+    sX =  numpy.zeros((140,140),dtype=numpy.int)
     #x,y action space
     Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
     state_trans = StateTranSpace(state_space=sX,action_space=Ux)
