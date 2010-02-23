@@ -113,10 +113,10 @@ class AnytimeDstar:
         values= self.state_trans.state_trans_fuction(s.point)
         hold_v = copy.deepcopy(values)
         for x in values:
-            if x in forbidden:
+            if x in self.forbidden:
                 hold_v.remove(x)
         s.successors = set()
-        for x in values:
+        for x in hold_v:
             newstate = State(x,self.s_start.point,self.s_goal.point)
             if self.G.has_key(newstate):
                 newstate = self.G[newstate]
