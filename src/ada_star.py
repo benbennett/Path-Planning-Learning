@@ -189,9 +189,9 @@ class AnytimeDstar:
             return
         toUpdate = []
         for aS in state.successors:
+            if aS.successors==None:
+                continue
             aS.remove_successor(state)
-            if aS in self.CLOSED:
-                self.CLOSED.remove(aS)
             toUpdate.append(aS)
         for aS in toUpdate:
             self.UpdateState(aS)
@@ -215,12 +215,25 @@ if __name__== "__main__":
     aDstart.ComputeorImprovePath() 
     print aDstart.getPath()
     aDstart.addForbidden((2,2))
+
+    aDstart.moveAllFromIncsToOpen()
+    aDstart.UpdateAllPriorities()
+    aDstart.CLOSED = set()
     aDstart.ComputeorImprovePath() 
     print aDstart.getPath()
     
     aDstart.addForbidden((3,3))
-    print aDstart.getPath()
+    aDstart.addForbidden((5,3))
+    aDstart.addForbidden((5,5))
+    aDstart.addForbidden((5,4))
+    aDstart.addForbidden((5,5))
+    aDstart.addForbidden((5,5))
+    aDstart.addForbidden((5,6))
+    aDstart.addForbidden((5,7))
+    aDstart.addForbidden((5,4))
+    aDstart.addForbidden((5,5))
     aDstart.moveAllFromIncsToOpen()
     aDstart.UpdateAllPriorities()
+    aDstart.CLOSED = set()
     aDstart.ComputeorImprovePath() 
     print aDstart.getPath()

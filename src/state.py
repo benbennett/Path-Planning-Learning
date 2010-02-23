@@ -86,7 +86,7 @@ class State:
             y=x
         if x1>y1:
             y1=x1
-        return y1+y 
+        return y1 
 
     def isGoal(self):
         return self.point == self.goal
