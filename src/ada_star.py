@@ -221,7 +221,11 @@ if __name__== "__main__":
     aDstart.CLOSED = set()
     aDstart.ComputeorImprovePath() 
     print aDstart.getPath()
-    
+    '''When changing the edge cost or graph one must
+       Move all states to the open state.
+        update all the priorities
+        set the closed state to the empty set. 
+        then call ComputeorImprovePath '''
     aDstart.addForbidden((3,3))
     aDstart.addForbidden((5,3))
     aDstart.addForbidden((5,5))
