@@ -28,15 +28,16 @@ namespace  planning
 	template<typename Z, typename R> 
 		class AnytimeDstar
 		{
-			typedef State<Z,R> state_def;	
-			typedef shared_ptr < State<Z,R> > shared_state_def;	
-			typedef std::vector<Z> vectorZ;
-			typedef Key<Z,R> key_def;
 			public:
 			shared_ptr < State < Z, R> > start_; 
 			shared_ptr < State < Z, R> > goal_; 
 			
-			
+			typedef State<Z,R> state_def;	
+			typedef shared_ptr < State<Z,R> > shared_state_def;	
+			typedef std::vector<Z> vectorZ;
+			typedef Key<Z,R> key_def;
+			typedef std::map< std::vector<Z>, shared_state_def > state_map_def;			
+
 		std::map< vectorZ , shared_state_def > forbidden_;
 		std::map< vectorZ , shared_state_def > states_;
 		std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def >  > open_;
@@ -49,17 +50,22 @@ namespace  planning
 			eps_=3.0;
 		}
 
-		void init(shared_state_def start,shared_state_def goal,std::map< vectorZ , shared_state_def > forbidden )
-			{
+		void init(shared_state_def start,shared_state_def goal )
+		{
 				eps_=3.0;
 				start_  = start;
-				start_->setGoal(goal_);
-				goal_->setStart(goal_);
+				start_->setGoal(goal);
+				goal_= goal;	
+				goal_->setStart(start);
 				goal_->setRhs(0);
 				goal_->in_queue_=true;	
 				key_def goal_key(goal_,eps_);
+				open_.push(goal_key);
+		}
+		void setForbidden(std::map< vectorZ , shared_state_def > forbidden)
+		{
+			forbidden_ = forbidden;
 
-			open_.push(goal_key);
 		}
 		void setEps(R eps)
 		{
@@ -113,7 +119,8 @@ namespace  planning
 				}
 				states_[point] = temp_ptr;
 				return temp_ptr;
-			}
+		}
+		
 		void addForbidden( std::vector<Z> point)
 		{
 
@@ -128,10 +135,10 @@ namespace  planning
 			//have to go through and disconnect the succ going to the 
 			//current point that is forbidden.
 			shared_state_def state = getState(point);
+			typename state_map_def::iterator  succ_iter;				
+			state_map_def hold_map;
 
 			shared_state_def hold_update_state;
-			typename std::map< std::vector<Z>, shared_state_def >::iterator  succ_iter;             
-			typename std::map< std::vector<Z>, shared_state_def > hold_map; 
 
 			hold_map =  state->getSuccessors();
 			succ_iter = hold_map.begin();   
@@ -247,8 +254,9 @@ namespace  planning
 				key_def hold_key;
 				shared_state_def hold_state;
 				shared_state_def hold_update_state;
-				typename std::map< std::vector<Z>, shared_state_def >::iterator  succ_iter;				
-				typename std::map< std::vector<Z>, shared_state_def > hold_map;	
+				//g++ wants the typename in front or it gets confused.	
+				typename state_map_def::iterator  succ_iter;				
+				state_map_def hold_map;
 				int states = 0;
 				while( filterQueue() && 
 							( key_def(open_.top(),eps_)
@@ -274,7 +282,6 @@ namespace  planning
 							hold_update_state = succ_iter->second;
 							assert(succ_iter->second!=NULL);
 							assert(succ_iter->second!=NULL);
-							hold_update_state = succ_iter->second;
 							buildState(hold_update_state);
 							UpdateState(hold_update_state);
 							succ_iter++;
@@ -283,7 +290,6 @@ namespace  planning
 					else
 					{
 						hold_state->setG(INF);
-						UpdateState(hold_state);
 						assert(hold_state->getSuccessors().size()>0);
 						succ_iter = hold_state->getSuccessors().begin();
 						while(succ_iter!= hold_state->getSuccessors().end())
