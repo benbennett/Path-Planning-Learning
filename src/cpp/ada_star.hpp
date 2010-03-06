@@ -155,8 +155,11 @@ namespace  planning
 					closed_.erase(succ_iter->first);
 				}
 				hold_update_state = succ_iter->second;
-				hold_update_state->removeSuccessor(state);
-				toUpdate.push_back(hold_update_state);
+				if(hold_update_state->getSuccessors().size()>0)
+				{
+					hold_update_state->removeSuccessor(state);
+					toUpdate.push_back(hold_update_state);
+				}	
 				succ_iter++;
 			}
 
