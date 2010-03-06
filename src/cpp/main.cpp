@@ -139,8 +139,8 @@ void testAnytimeDstar()
 	typedef  State<int,double> aState;
 	typedef  AnytimeDstar<int,double> ADStar_def;
 	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar(100,100);
-	shared_state_def start = adstar.createState(1,1);
-	adstar.init(start);
-    cout<<adstar.ComputeorImprovePath()<<endl;
+	//ADStar_def adstar(100,100);
+//	shared_state_def start = adstar.createState(1,1);
+//	adstar.init(start);
+ //   cout<<adstar.ComputeorImprovePath()<<endl;
 }

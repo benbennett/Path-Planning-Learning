@@ -7,6 +7,8 @@
 http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005_1.pdf
 */
 
+#ifndef ADA_STAR_HPP_
+#define ADA_STAR_HPP_
 #include <vector> 
 #include <iterator>
 #include <cmath>
@@ -17,332 +19,10 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
+#include "state.hpp"
+#include "key.hpp"
 namespace  planning 
 {
-	const double INF=10000000.0;
-	using namespace boost;
-	using namespace std;
-	template <typename Z , typename R>
-		class State
-		{
-			public: 
-				typedef std::vector<Z> tuple;
-				bool in_queue_;
-			public:
-				tuple point_;
-				R rhs_value_;
-				R gofs_;
-				//Have to use a pointer , otherwise it is incomplete type. 
-				//IE doesn't know how to istatinate a instance 
-				//Little confusing , dynamic 
-				//
-				std::map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
-				shared_ptr<  State<Z,R> >min_successor_;
-				R min_successor_value_;
-				shared_ptr< State<Z,R> >start_;
-				shared_ptr< State<Z,R> >goal_;
-				void clear()
-				{
-					Z pt[] = {0,0};
-					std::vector<Z> start_pt(pt,pt+2);
-					rhs_value_=INF;
-					gofs_ = INF; 
-
-				}
-			public:
-				State():successors_()
-				{
-					in_queue_= false;
-					clear();
-				}
-				State(tuple pos):successors_()
-				{
-
-					in_queue_= false;
-					clear();
-					this->point_= pos;
-
-				}
-				State(boost::shared_ptr< State <Z,R> >  goal,tuple pos){
-
-					in_queue_= false;
-					clear();
-					goal_  = goal;
-				}
-				State(tuple pos, boost::shared_ptr< State <Z,R> >  start,boost::shared_ptr< State <Z,R> >  goal):successors_()
-				{
-					in_queue_= false;
-					clear();
-					start_ = start;
-					point_ = pos;
-					goal_  = goal;
-				}
-				void setStart(boost::shared_ptr< State <Z,R> > & start)
-				{
-					start_ = start;
-				}
-
-				void setGoal(boost::shared_ptr< State <Z,R> > & goal)
-				{
-					goal_ = goal;
-				}
-				friend std::size_t  hash_value(State<Z,R> const & in)
-				{
-					std::size_t seed=0;
-					boost::hash_combine(seed,in.point_[0]);
-					boost::hash_combine(seed,in.point_[1]);
-					return seed;
-
-				}
-			
-					
-				std::map< std::vector<Z> , shared_ptr< State<Z,R> > >  getSuccessors() const
-				{
-					return successors_;
-				}
-				State <Z,R> getMinSuccessor()
-				{
-					R min = -1;
-					typename std::map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
-					State<Z,R> hold;
-					assert(successors_.size()>0);
-					pos	= successors_.begin();
-					while(pos!=successors_.end())
-					{
-						hold = *(pos->second);
-						if( min<0 || min> csprimeGsprime(hold))
-						{
-							min = csprimeGsprime(hold);
-							min_successor_ = pos->second;
-						}	
-						pos++;
-					}
-					min_successor_value_ = min;
-						
-					return *min_successor_;
-				}
-
-				R  getMinSuccessorValue()
-				{
-					getMinSuccessor();
-					return min_successor_value_;	
-				}
-				void removeSuccessor(State const & s)
-				{
-
-				}
-				void addSuccessor(shared_ptr< State<Z,R> > in)
-				{
-					assert(in!=NULL);
-					successors_[in->getPoint()] = in;
-				}
-
-				R rhs()
-				{
-					return rhs_value_;
-				}
-
-				void setRhs(R in)
-				{
-					rhs_value_ = in; 	
-				}
-
-				R csprimeGsprime(State<Z,R>  & sprime  ) 
-				{
-					return R( cost(sprime) + sprime.g() ) ;
-				}
-
-				R cost(State<Z,R> const & sprime) 
-				{
-					return R (1) ;
-				}
-
-				R g()
-				{
-					return gofs_;
-				}
-
-				void setG(R g )
-				{
-					gofs_ = g;
-				}
-
-				R  h()
-				{
-					assert(goal_!=NULL);
-					assert(start_!=NULL);
-					R mr=-1;
-					R max =-1;
-					for(int i=0;i<2;i++)
-					{
-						mr = std::abs(goal_->point_[i] - point_[i]);
-						if(mr>max)
-							max=mr;
-					}	
-					mr=-1;
-					R max2 =-1;
-					for(int i=0;i<2;i++)
-					{
-						mr = std::abs(start_->point_[i] - point_[i]);
-						if(mr>max2)
-							max2=mr;
-					}
-					max+=max2;
-					
-					return max+max2;
-				}
-				std::vector<Z> getPoint()
-				{
-					return point_;
-				}
-				bool isGoal()
-				{
-					return goal_->point_ == point_;
-				}
-
-				bool operator==(State<Z,R> const & rhs) const
-				{
-					return rhs.point_==this->point_;
-				}
-				friend std::ostream& operator << (std::ostream& os, const State<Z,R>& in)
-				{
-					os<<"(";
-					std::copy(in.point_.begin(),in.point_.end(),std::ostream_iterator <R>(os,","));	
-					os<<")";
-					return os;
-				}
-		};
-
-	template<typename Z, typename R> 
-		class Key 
-		{
-			public:
-				Key( shared_ptr < State < Z , R >  >  s,R  eps)
-				{
-					state_ = s;
-					if( s->g()> s->rhs())
-					{
-						k1 = s->rhs()+eps*s->h();
-						k2 = s->rhs();
-					}
-					else
-					{
-						k1 = s->g()+ s->h();
-						k2 = s->g();
-					}			
-				}
-				Key( Key<Z,R> const  & other)
-				{
-					state_ = other.state_;
-
-					k1 = other.k1; 
-					k2 = other.k2; 
-				}
-
-				Key( Key<Z,R>   &  other,R  eps)
-				{
-					state_ = other.state_;
-					if( state_->g()> state_->rhs())
-					{
-						k1 = state_ ->rhs()+eps*(state_->h());
-						k2 = state_ ->rhs();
-					}
-					else
-					{
-						k1 = state_->g()+ state_->h();
-						k2 = state_->g();
-					}			
-				}
-
-				Key( Key<Z,R>  const &  other,R  eps)
-				{
-					state_ = other.state_;
-
-					if( state_->g()> state_->rhs())
-					{
-						k1 = state_ ->rhs()+eps*(state_->h());
-						k2 = state_ ->rhs();
-					}
-					else
-					{
-						k1 = state_->g()+ state_->h();
-						k2 = state_->g();
-					}			
-				}
-				Key()
-				{
-					k1 = INF;
-					k2 = INF;
-				}
-				Key(R k1_in, R k2_in)
-				{
-					k1=k1_in; 
-					k2=k2_in;
-				}
-			public:
-				R k1;
-				R k2;
-				shared_ptr < State < Z , R >  > state_;
-			public:
-				void setState( shared_ptr < State < Z , R >  > in)
-				{
-					state_ = in;
-				}
-				shared_ptr < State < Z , R >  >  getState()
-				{
-					return state_;
-				}
-				bool operator==(const Key &rhs) const
-				{
-					if(k1==rhs.k1 && k2==rhs.k2)
-						return true;
-					return false;
-				}
-				bool operator>=(const Key &rhs) const
-				{
-					if(*this>rhs || *this==rhs )
-						return true;
-					return false;
-				}
-				bool operator<=(const Key &rhs) const
-				{
-					if (*this<rhs || *this==rhs)
-						return true;
-					return false;
-				}
-				bool operator!=(const Key &rhs) const
-				{
-					if(*this == rhs)
-						return false;
-					return true;
-				}
-				bool operator<(const Key &rhs) const
-				{
-					if(k1< rhs.k1)
-						return true;
-					if(k1==rhs.k1 && k2<rhs.k2)
-						return true;	
-					return false;
-				}
-				bool operator>(const Key &rhs) const
-				{
-					if( *this== rhs)
-						return false;
-					return !(*this< rhs);	
-				}
-				Key &  operator= (const Key & rhs)
-				{
-					k1 = rhs.k1;
-					k2 = rhs.k2;
-					state_ = rhs.state_;
-					return (*this);
-				}
-				friend std::ostream& operator << (std::ostream& os, const Key<Z,R>& in)
-				{
-					os<<in.k1 <<","<<in.k2 << " "<<*in.state_;
-					return os;	
-				}
-		};
 
 
 	template<typename Z, typename R> 
@@ -357,23 +37,19 @@ namespace  planning
 			shared_ptr < State < Z, R> > goal_; 
 			
 			
-			std::map< vectorZ , shared_state_def > states_;
-			std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def >  > open_;
-			std::map< vectorZ , shared_state_def > incons_;
-			std::map< vectorZ , shared_state_def > closed_ ;
-			R eps_;
-			public:
-			AnytimeDstar():states_(),open_(),closed_(),incons_()
-			{
-				eps_=3.0;
-			}
-			AnytimeDstar(Z first, Z second):states_(),open_(),closed_(),incons_()
-			{
-				eps_=3.0;
-				shared_state_def hold = createState(first,second);
-				goal_ = hold;	
-			}
-			void init(shared_state_def start)
+		std::map< vectorZ , shared_state_def > forbidden_;
+		std::map< vectorZ , shared_state_def > states_;
+		std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def >  > open_;
+		std::map< vectorZ , shared_state_def > incons_;
+		std::map< vectorZ , shared_state_def > closed_ ;
+		R eps_;
+	public:
+		AnytimeDstar():states_(),open_(),closed_(),incons_()
+		{
+			eps_=3.0;
+		}
+
+		void init(shared_state_def start,shared_state_def goal,std::map< vectorZ , shared_state_def > forbidden )
 			{
 				eps_=3.0;
 				start_  = start;
@@ -383,52 +59,109 @@ namespace  planning
 				goal_->in_queue_=true;	
 				key_def goal_key(goal_,eps_);
 
-				open_.push(goal_key);
-			}	
-			void setStart( const shared_state_def & start)
+			open_.push(goal_key);
+		}
+		void setEps(R eps)
+		{
+			eps_ = eps;
+		}   
+		std::map< vectorZ , shared_state_def > getForbidden()
+		{
+			return forbidden_;
+		}   
+		void setStart( const shared_state_def & start)
+		{
+			start_ = start;
+		}
+		shared_state_def getStart()
+		{
+			return start_;
+		}
+		bool hasKey(std::vector<Z> point)
+		{
+			return  states_.find(point)!= states_.end(); 
+		}
+		shared_state_def getState( std::vector<Z> point)
+		{
+			return  states_.at(point);
+		}
+		void addState( std::vector<Z> point, shared_state_def state)
+		{
+			states_[point] = state;
+		}       
+		shared_state_def createState( Z first, Z second)
+		{
+			Z  pt[] = {first,second};
+			std::vector<Z> point(pt,pt+2);
+			if ( hasKey(point))
 			{
-				start_ = start;
+				return states_[point];
 			}
-			shared_state_def getStart()
+			shared_state_def  temp_ptr;
+			temp_ptr.reset(new state_def(point));
+			if (goal_==NULL)
+				temp_ptr->setGoal(temp_ptr);
+			else
 			{
-				return start_;
-			}
-			bool hasKey(std::vector<Z> point)
-			{
-				return  states_.find(point)!= states_.end(); 
-			}
-			shared_state_def getState( std::vector<Z> point)
-			{
-				return  states_.at(point);
-			}
-			void addState( std::vector<Z> point, shared_state_def state)
-			{
-				states_[point] = state;
-			}		
-			shared_state_def createState( Z first, Z second)
-			{
-				Z  pt[] = {first,second};
-				std::vector<Z> point(pt,pt+2);
-				if( hasKey(point))
-				{
-					return states_[point];
-				}	
-				shared_state_def  temp_ptr;
-				temp_ptr.reset(new state_def(point));
-				if(goal_==NULL)
-					temp_ptr->setGoal(temp_ptr);
-				else{
 					temp_ptr->setGoal(goal_);
 				}
 				if(start_==NULL)
 					temp_ptr->setStart(temp_ptr);
-				else{
+			else
+			{
 					temp_ptr->setStart(start_);
 				}
 				states_[point] = temp_ptr;
 				return temp_ptr;
 			}
+		void addForbidden( std::vector<Z> point)
+		{
 
+			if (forbidden_.find(point) != forbidden_.end())
+				return;
+			forbidden_.insert(point);
+			if (!hasKey(point))
+			{
+				//do not have to do anything if point has not be visited. 
+				return; 
+			}
+			//have to go through and disconnect the succ going to the 
+			//current point that is forbidden.
+			shared_state_def state = getState(point);
+
+			shared_state_def hold_update_state;
+			typename std::map< std::vector<Z>, shared_state_def >::iterator  succ_iter;             
+			typename std::map< std::vector<Z>, shared_state_def > hold_map; 
+
+			hold_map =  state->getSuccessors();
+			succ_iter = hold_map.begin();   
+			std::vector< shared_state_def > toUpdate;   
+			typename std::vector<  shared_state_def  >::iterator toUpdate_iter; 
+			while (succ_iter!= hold_map.end())
+			{
+				hold_update_state = succ_iter->second;
+
+				assert(succ_iter->first!=NULL);
+				assert(succ_iter->second!=NULL);
+				if (closed_.find(succ_iter->first)!= closed_.end())
+				{
+					closed_.erase(succ_iter->first);
+				}
+				hold_update_state = succ_iter->second;
+				hold_update_state->removeSuccessor(state);
+				toUpdate.push_back(hold_update_state);
+				succ_iter++;
+			}
+
+			toUpdate_iter = toUpdate.begin();
+			while (toUpdate_iter != toUpdate.end())
+			{
+				UpdateState(*toUpdate_iter);
+				toUpdate_iter->getMinSuccessor();   
+				toUpdate_iter++;
+			}
+
+		}
 			void  buildState( shared_state_def & in)
 			{
 				if(in->getSuccessors().size()==0)
@@ -443,10 +176,17 @@ namespace  planning
 							}
 							Z first = in->getPoint()[0]+ x;
 							Z second = in->getPoint()[1]+y;
+
+						Z  pt[] = {first,second};
+						std::vector<Z> point(pt,pt+2);
+						//only add succ iff not in forbidden		
+						if (forbidden_.find( point) == forbidden_.end())
+						{
 							shared_state_def hold =createState(first,second);
 							in->addSuccessor(hold);	
 						}
 					}
+				}
 					assert(in->getSuccessors().size()>0);
 				}
 			}
@@ -562,3 +302,4 @@ namespace  planning
 
 		};
 }
+#endif
