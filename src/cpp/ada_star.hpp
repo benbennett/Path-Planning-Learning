@@ -45,10 +45,10 @@ namespace  planning
 				std::map< vectorZ , shared_state_def > closed_ ;
 				R eps_;
 			public:
-				AnytimeDstar():states_(),open_(),closed_(),incons_()
-			{
-				eps_=3.0;
-			}
+				AnytimeDstar()
+				{
+					eps_=3.0;
+				}
 
 				void init(shared_state_def start,shared_state_def goal )
 				{
