@@ -120,7 +120,13 @@ namespace  planning
 					states_[point] = temp_ptr;
 					return temp_ptr;
 				}
-
+				/*  Add forbidden.
+				 *  Check if it is has been visited at all, take note , return 
+				 *  Else  go through and remove all states that connect to the new forbidden
+				 *  state, remove the conntected point and updated the connected states in 
+				 *  the priority queue. 
+				 *
+				 */
 				void addForbidden( std::vector<Z> point)
 				{
 
@@ -172,6 +178,12 @@ namespace  planning
 					}
 
 				}
+				/* Build up state for the first time , if it has not been explored before. 
+				 * Find out if 
+				 *
+				 *
+				 *
+				 */
 				void  buildState( shared_state_def & in)
 				{
 					if(in->getSuccessors().size()==0)
@@ -200,6 +212,13 @@ namespace  planning
 						assert(in->getSuccessors().size()>0);
 					}
 				}
+				/* Changes the priorities of the keys in the queue . 
+				 * Should be called after graph change or when the inflation factor changed. 
+				 *
+				 *
+				 *
+				 *
+				 */
 				void UpdateAllPriorities()
 				{
 
@@ -212,6 +231,15 @@ namespace  planning
 					}
 					open_= newqueue;
 				}
+				/* Update the state  
+				 * if s not goal
+				 *   rhs(s) = min_succ(s)
+				 * if rhs(s) != g(s)
+				 *    if not in closed : 
+				 *		put in open
+				 *	  else:
+				 *		 put in incons
+				 */
 				void UpdateState( shared_state_def & s)
 				{
 					if( !(s->isGoal()))
@@ -234,6 +262,12 @@ namespace  planning
 							incons_[s->getPoint()] = s;
 					}			
 				}
+				/* Clears out all points that should be removed from the queue.
+				 * The points are removed because they are the successor of a point that
+				 * was just anazalzed and its priority has already been checked.
+				 * TODO priority map is what needs to be done to replace this   
+				 * functionality. 
+				 */
 				bool filterQueue()
 				{
 
@@ -252,6 +286,7 @@ namespace  planning
 						return false;
 					return true;	
 				}
+
 				int ComputeorImprovePath()
 				{
 					key_def hold_key;
