@@ -110,4 +110,23 @@ BOOST_AUTO_TEST_CASE(adasimpletest)
 
 	adstar.init(start,goal);
     BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+	std::list< shared_state_def > foo = adstar.getPath();
+	std::list< shared_state_def >::iterator it;
+	it= foo.end();
+	it--;
+	std::vector<int> hold= (*it)->getPoint();
+	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
+	BOOST_CHECK(hold[0]==100);
+	BOOST_CHECK(hold[1]==100);
+	it = foo.begin();
+	//should be a diagonal so we will check it.	
+	int i=2;
+	while(it!=foo.end())
+	{
+		hold= (*it)->getPoint();
+		BOOST_CHECK(hold[0]==i);
+		BOOST_CHECK(hold[1]==i);
+		i++;
+		it++;
+	}
 }

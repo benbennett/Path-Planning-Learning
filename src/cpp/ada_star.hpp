@@ -11,6 +11,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #define ADA_STAR_HPP_
 #include <vector> 
 #include <iterator>
+#include <list>
 #include <cmath>
 #include <queue>
 #include <functional>
@@ -343,7 +344,26 @@ namespace  planning
 					}
 					return states;
 				}
-
+				/* Utility method to get a list of states from start to goal.
+				 * Not really need , but just a ease of use. 
+				 */	
+				std::list< shared_ptr <  State < Z, R>  >  > getPath()
+				{
+					std::list< shared_ptr < State < Z, R> > > m_return;
+					//typename state_def hold; 
+					shared_ptr < State < Z, R> > hold;			
+					hold= start_;
+					do
+					{					
+						//you shouldn't need the beginning
+						//because that is where you are starting.	
+						hold = hold->getMinSuccessor();
+						m_return.push_back(hold);
+					}
+					while(hold!=goal_);
+					return m_return;	
+					//hold = start_->getMinSuccessor(); 
+				}
 		};
 }
 #endif

@@ -95,7 +95,7 @@ namespace  planning
 				{
 					return successors_;
 				}
-				State <Z,R> getMinSuccessor()
+				boost::shared_ptr<	State <Z,R> > getMinSuccessor()
 				{
 					R min = -1;
 					typename std::map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
@@ -114,7 +114,7 @@ namespace  planning
 					}
 					min_successor_value_ = min;
 						
-					return *min_successor_;
+					return min_successor_;
 				}
 
 				R  getMinSuccessorValue()
@@ -122,7 +122,7 @@ namespace  planning
 					getMinSuccessor();
 					return min_successor_value_;	
 				}
-		void removeSuccessor(shared_ptr< State<Z,R> > in)
+				void removeSuccessor(shared_ptr< State<Z,R> > in)
 				{
 			assert(in!=NULL);
 			successors_.erase(in->getPoint());
