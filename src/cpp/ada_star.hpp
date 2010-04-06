@@ -155,8 +155,6 @@ namespace  planning
 					{
 						hold_update_state = succ_iter->second;
 
-						assert(succ_iter->first!=NULL);
-						assert(succ_iter->second!=NULL);
 						if (closed_.find(succ_iter->first)!= closed_.end())
 						{
 							closed_.erase(succ_iter->first);
