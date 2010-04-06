@@ -172,7 +172,7 @@ namespace  planning
 					while (toUpdate_iter != toUpdate.end())
 					{
 						UpdateState(*toUpdate_iter);
-						toUpdate_iter->getMinSuccessor();   
+						(*toUpdate_iter)->getMinSuccessor();   
 						toUpdate_iter++;
 					}
 
