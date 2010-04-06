@@ -39,7 +39,7 @@ namespace  planning
 				typedef Key<Z,R> key_def;
 				typedef std::map< std::vector<Z>, shared_state_def > state_map_def;			
 
-				std::map< vectorZ , shared_state_def > forbidden_;
+				std::map< vectorZ , Z > forbidden_;
 				std::map< vectorZ , shared_state_def > states_;
 				std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def >  > open_;
 				std::map< vectorZ , shared_state_def > incons_;
@@ -133,7 +133,7 @@ namespace  planning
 
 					if (forbidden_.find(point) != forbidden_.end())
 						return;
-					forbidden_.insert(point);
+					forbidden_[point] = 0; 
 					if (!hasKey(point))
 					{
 						//do not have to do anything if point has not be visited. 
