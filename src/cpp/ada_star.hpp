@@ -225,10 +225,35 @@ namespace  planning
 					while(!open_.empty())
 					{
 						key_def hold = open_.top();
-						newqueue.push( key_def(hold->getState(),eps_));
+						newqueue.push( key_def(hold.getState(),eps_));
 						open_.pop();	
 					}
-					open_= newqueue;
+
+					while(!newqueue.empty())
+					{
+						key_def hold = newqueue.top();
+						open_.push( key_def(hold.getState(),eps_));
+						newqueue.pop();
+					}
+				}
+				void MoveAllFromIncsToOpen()
+				{
+
+
+					typename state_map_def::iterator  iter;	
+					iter =incons_.begin();
+					while(iter!=incons_.end())
+					{
+						open_.push(key_def(iter->second,eps_));
+						iter++;	
+					}
+					incons_.clear();
+					
+				}
+				void ClearClosed()
+				{
+
+					this->closed_.clear();
 				}
 				/* Update the state  
 				 * if s not goal

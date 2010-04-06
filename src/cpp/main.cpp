@@ -68,6 +68,14 @@ BOOST_AUTO_TEST_CASE(testKeyClass)
 
 }
 
+inline std::vector<int> createState(int x, int y)
+{
+
+	int point[] = { x,y}; 
+	std::vector<int> st1(point,point+2);
+	return st1;
+
+}
 BOOST_AUTO_TEST_CASE(StateTestCase)
 {
 
@@ -91,6 +99,99 @@ BOOST_AUTO_TEST_CASE(StateTestCase)
 
 }
 
+
+BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
+{
+
+	using namespace planning;
+	using namespace std;
+	typedef  State<int,double> aState;
+	typedef  AnytimeDstar<int,double> ADStar_def;
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+	ADStar_def adstar;
+	
+	shared_state_def start = adstar.createState(1,1);
+	shared_state_def goal = adstar.createState(100,100);
+
+	adstar.init(start,goal);
+    BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+	//not on path to test outside of path 	
+
+	for(int j=2;j<100;j++)
+	{
+
+		adstar.addForbidden(createState(j,j));	
+
+	}
+	adstar.MoveAllFromIncsToOpen();
+	adstar.UpdateAllPriorities();
+	adstar.ClearClosed();
+	adstar.ComputeorImprovePath();
+	std::list< shared_state_def > foo = adstar.getPath();
+	std::list< shared_state_def >::iterator it;
+	it= foo.end();
+	it--;
+	std::vector<int> hold= (*it)->getPoint();
+	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
+	
+	BOOST_CHECK(hold[0]==100);
+	BOOST_CHECK(hold[1]==100);
+
+	it = foo.begin();
+	//should be a diagonal so we will check it.	
+	int i=2;
+	while(i<100)
+	{
+		hold= (*it)->getPoint();
+		BOOST_CHECK(!(hold[0]==i && hold[1]==i));
+		i++;
+		it++;
+	}
+}
+
+BOOST_AUTO_TEST_CASE(adaAddForbidden)
+{
+
+	using namespace planning;
+	using namespace std;
+	typedef  State<int,double> aState;
+	typedef  AnytimeDstar<int,double> ADStar_def;
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+	ADStar_def adstar;
+	
+	shared_state_def start = adstar.createState(1,1);
+	shared_state_def goal = adstar.createState(100,100);
+
+	adstar.init(start,goal);
+    BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+	//not on path to test outside of path 	
+		
+	adstar.addForbidden(createState(4,5));	
+	adstar.ComputeorImprovePath();
+	std::list< shared_state_def > foo = adstar.getPath();
+	std::list< shared_state_def >::iterator it;
+	it= foo.end();
+	it--;
+	std::vector<int> hold= (*it)->getPoint();
+	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
+	BOOST_CHECK(hold[0]==100);
+	BOOST_CHECK(hold[1]==100);
+	it = foo.begin();
+	//should be a diagonal so we will check it.	
+	int i=2;
+	while(it!=foo.end())
+	{
+		hold= (*it)->getPoint();
+		BOOST_CHECK(hold[0]==i);
+		BOOST_CHECK(hold[1]==i);
+		i++;
+		it++;
+	}
+}
 
 BOOST_AUTO_TEST_CASE(adasimpletest)
 {
