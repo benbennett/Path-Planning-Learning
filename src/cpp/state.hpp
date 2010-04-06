@@ -7,6 +7,8 @@
 #include <queue>
 #include <functional>
 #include <boost/unordered_set.hpp>
+#include <sstream>
+#include <string>
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
@@ -100,7 +102,13 @@ namespace  planning
 					R min = -1;
 					typename std::map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
 					State<Z,R> hold;
-					assert(successors_.size()>0);
+					if(!(successors_.size()>0))
+					{
+						std::stringstream ss(std::stringstream::out); 
+						ss<<"("<<point_[0]<<","<<point_[1]<<")"<< "call to getSuccessors no successors "<<std::endl;
+						std::cerr<<ss.str();
+						throw 20; 
+					}
 					pos	= successors_.begin();
 					while(pos!=successors_.end())
 					{
