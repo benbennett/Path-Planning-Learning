@@ -2,6 +2,7 @@
 #include "ada_star.hpp"
 #include "key.hpp"
 #include "state.hpp"
+#include <vector>
 #include <iostream>
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
@@ -119,35 +120,58 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
     BOOST_CHECK(adstar.ComputeorImprovePath()==99);
 	//not on path to test outside of path 	
 
-	for(int j=2;j<100;j++)
+	for(int j=2;j<50;j++)
 	{
-
+		//add a bunch
 		adstar.addForbidden(createState(j,j));	
 
 	}
+
 	adstar.MoveAllFromIncsToOpen();
 	adstar.UpdateAllPriorities();
 	adstar.ClearClosed();
 	adstar.ComputeorImprovePath();
-	std::list< shared_state_def > foo = adstar.getPath();
-	std::list< shared_state_def >::iterator it;
-	it= foo.end();
-	it--;
-	std::vector<int> hold= (*it)->getPoint();
+
+	for(int j=50;j<100;j++)
+	{
+		//add spot and call planner again
+		adstar.addForbidden(createState(j,j));	
+
+		adstar.MoveAllFromIncsToOpen();
+		adstar.UpdateAllPriorities();
+		adstar.ClearClosed();
+		adstar.ComputeorImprovePath();
+	}
+	std::list< shared_state_def > final_path = adstar.getPath();
+	std::list< shared_state_def >::iterator iter_path;
+	iter_path= final_path.end();
+	iter_path--;
+	std::vector<int> hold= (*iter_path)->getPoint();
 	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
 	
 	BOOST_CHECK(hold[0]==100);
 	BOOST_CHECK(hold[1]==100);
-
-	it = foo.begin();
+    	
+	iter_path = final_path.begin();
 	//should be a diagonal so we will check it.	
 	int i=2;
 	while(i<100)
 	{
-		hold= (*it)->getPoint();
+		hold= (*iter_path)->getPoint();
 		BOOST_CHECK(!(hold[0]==i && hold[1]==i));
 		i++;
-		it++;
+		iter_path++;
+	}
+	//final sanity checks
+	std::map< std::vector<int> , int > forbiddens = adstar.getForbidden();
+
+	iter_path = final_path.begin();
+	//should be a diagonal so we will check it.	
+	while(iter_path!=final_path.end())
+	{
+		hold= (*iter_path)->getPoint();
+		BOOST_CHECK(forbiddens.find(hold) == forbiddens.end());	
+		iter_path++;
 	}
 }
 
@@ -172,24 +196,24 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 		
 	adstar.addForbidden(createState(4,5));	
 	adstar.ComputeorImprovePath();
-	std::list< shared_state_def > foo = adstar.getPath();
-	std::list< shared_state_def >::iterator it;
-	it= foo.end();
-	it--;
-	std::vector<int> hold= (*it)->getPoint();
+	std::list< shared_state_def > final_path = adstar.getPath();
+	std::list< shared_state_def >::iterator iter_path;
+	iter_path= final_path.end();
+	iter_path--;
+	std::vector<int> hold= (*iter_path)->getPoint();
 	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
 	BOOST_CHECK(hold[0]==100);
 	BOOST_CHECK(hold[1]==100);
-	it = foo.begin();
+	iter_path = final_path.begin();
 	//should be a diagonal so we will check it.	
 	int i=2;
-	while(it!=foo.end())
+	while(iter_path!=final_path.end())
 	{
-		hold= (*it)->getPoint();
+		hold= (*iter_path)->getPoint();
 		BOOST_CHECK(hold[0]==i);
 		BOOST_CHECK(hold[1]==i);
 		i++;
-		it++;
+		iter_path++;
 	}
 }
 
@@ -211,23 +235,23 @@ BOOST_AUTO_TEST_CASE(adasimpletest)
 
 	adstar.init(start,goal);
     BOOST_CHECK(adstar.ComputeorImprovePath()==99);
-	std::list< shared_state_def > foo = adstar.getPath();
-	std::list< shared_state_def >::iterator it;
-	it= foo.end();
-	it--;
-	std::vector<int> hold= (*it)->getPoint();
+	std::list< shared_state_def > final_path = adstar.getPath();
+	std::list< shared_state_def >::iterator iter_path;
+	iter_path= final_path.end();
+	iter_path--;
+	std::vector<int> hold= (*iter_path)->getPoint();
 	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
 	BOOST_CHECK(hold[0]==100);
 	BOOST_CHECK(hold[1]==100);
-	it = foo.begin();
+	iter_path = final_path.begin();
 	//should be a diagonal so we will check it.	
 	int i=2;
-	while(it!=foo.end())
+	while(iter_path!=final_path.end())
 	{
-		hold= (*it)->getPoint();
+		hold= (*iter_path)->getPoint();
 		BOOST_CHECK(hold[0]==i);
 		BOOST_CHECK(hold[1]==i);
 		i++;
-		it++;
+		iter_path++;
 	}
 }
