@@ -72,7 +72,7 @@ namespace  planning
 				{
 					eps_ = eps;
 				}   
-				std::map< vectorZ , shared_state_def > getForbidden()
+				std::map< vectorZ , Z >getForbidden()
 				{
 					return forbidden_;
 				}   
