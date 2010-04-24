@@ -151,12 +151,17 @@ class AnytimeDstar:
            self.CLOSED.add(state)
            return True
         else:
-           state.set_g(constants.INF)
+           state.set_g(2*constants.INF)
            return False
-    def ComputeorImprovePath(self):
+    """
+    This allows to fix the path around when a path has been broken by an
+    obstacle. 
+
+    """
+    def __ImprovePath__(self,start):
         states = 0
-        while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \
-             or self.s_start.g()!= self.s_start.rhs()):
+        while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())<self.keys(start) \
+             or start.g()!= start.rhs()):
 
             #print self.keys(self.OPEN.smallest()) , "----",self.keys(self.s_start)
             hold_state = self.OPEN.smallest()
@@ -174,6 +179,9 @@ class AnytimeDstar:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
         print states 
+
+    def ComputeorImprovePath(self):
+        self.__ImprovePath__(self.s_start)
     def getPath(self):
         curP = aDstart.get_start()
         path = []
@@ -200,13 +208,11 @@ class AnytimeDstar:
             return
         toUpdate = []
         for aS in state.successors:
-            if aS.successors==None:
-                continue
+            self.__build_state__(aS)
             aS.remove_successor(state)
             toUpdate.append(aS)
         for aS in toUpdate:
             self.UpdateState(aS)
-            aS.min_of_successors()
     def moveAllFromIncsToOpen(self):
         for aS in self.INCONS:
             self.OPEN[aS] = self.keys(aS)
