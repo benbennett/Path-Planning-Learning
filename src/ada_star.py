@@ -185,17 +185,16 @@ class AnytimeDstar:
     def getPath(self):
         curP = aDstart.get_start()
         path = []
-        self.path_=set()
-        self.path_.add(curP)
+        self.path_={}
         while(curP!=None):
             path.append(curP)
-            curP = curP.get_min_succesor()
-            if curP in self.path_:
-                err = str(curP)
+            hold = curP.get_min_succesor()
+            if self.path_.has_key(hold):
+                err = str(hold)
                 print path
                 raise Exception('Cycle detected'+err)
-            
-            self.path_.add(curP)
+            self.path_[hold] = curP  
+            curP = hold   
         return path
     def addForbidden(self,point):
         if point in self.forbidden:
