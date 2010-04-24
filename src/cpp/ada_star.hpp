@@ -323,7 +323,7 @@ namespace  planning
 					while( filterQueue() && 
 							( key_def(open_.top(),eps_)
 							  < key_def(start_,eps_)
-							  || start_->g() != start_->g()) )
+							  || start_->g() != start_->rhs()) )
 					{
 						hold_key =  open_.top();
 						hold_state = hold_key.getState();	
@@ -353,8 +353,11 @@ namespace  planning
 						{
 							hold_state->setG(INF);
 							assert(hold_state->getSuccessors().size()>0);
-							succ_iter = hold_state->getSuccessors().begin();
-							while(succ_iter!= hold_state->getSuccessors().end())
+
+							hold_map = hold_state->getSuccessors();
+							succ_iter = hold_map.begin();
+
+							while(succ_iter!= hold_map.end())
 							{
 								hold_update_state = succ_iter->second;
 								buildState(hold_update_state);
