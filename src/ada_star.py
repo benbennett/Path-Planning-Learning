@@ -145,7 +145,14 @@ class AnytimeDstar:
                 self.OPEN[s] = self.keys(s)
             else:
                 self.INCONS.add(s) 
-
+    def isConsistent(self,state):
+        if state.g() > state.rhs():
+           state.set_g(state.rhs())
+           self.CLOSED.add(state)
+           return True
+        else:
+           state.set_g(constants.INF)
+           return False
     def ComputeorImprovePath(self):
         states = 0
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())< self.keys(self.s_start) \
@@ -157,14 +164,11 @@ class AnytimeDstar:
             states+=1 
             self.OPEN.remove(hold_state)
             self.__build_state__(hold_state)
-            if hold_state.g() > hold_state.rhs():
-                hold_state.set_g(hold_state.rhs())
-                self.CLOSED.add(hold_state)
+            if self.isConsistent(hold_state):
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
             else:
-                hold_state.set_g(constants.INF)
                 self.UpdateState(hold_state)
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
