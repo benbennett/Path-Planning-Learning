@@ -173,8 +173,6 @@ namespace  planning
 
 				R  h()
 				{
-					assert(goal_!=NULL);
-					assert(start_!=NULL);
 					R mr=-1;
 					R max =-1;
 					for(int i=0;i<2;i++)
@@ -191,9 +189,8 @@ namespace  planning
 						if(mr>max2)
 							max2=mr;
 					}
-					max+=max2;
 					
-					return max+max2;
+					return max2;
 				}
 				std::vector<Z> getPoint()
 				{
