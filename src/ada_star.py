@@ -156,17 +156,16 @@ class AnytimeDstar:
             #TODO debug methods 
             states+=1 
             self.OPEN.remove(hold_state)
+            self.__build_state__(hold_state)
             if hold_state.g() > hold_state.rhs():
                 hold_state.set_g(hold_state.rhs())
                 self.CLOSED.add(hold_state)
-                self.__build_state__(hold_state)
-                self.UpdateState(hold_state)
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)
             else:
                 hold_state.set_g(constants.INF)
-                self.__build_state__(hold_state)
+                self.UpdateState(hold_state)
                 for aState in hold_state.successors:
                     self.__build_state__(aState)
                     self.UpdateState(aState)

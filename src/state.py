@@ -80,8 +80,6 @@ class State:
         """ 
         x1= abs((self.start[0]-self.point[0]))
         y1= abs((self.start[1]-self.point[1]))
-        if x>y:
-            y=x
         if x1>y1:
             y1=x1
         return y1 
