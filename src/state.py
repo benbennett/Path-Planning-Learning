@@ -78,8 +78,6 @@ class State:
             where c is the least cost of moving from s to the goal. 
             Cannot 'overestimate' the cost 
         """ 
-        x= abs((self.goal[0]-self.point[0]))
-        y= abs((self.goal[1]-self.point[1]))
         x1= abs((self.start[0]-self.point[0]))
         y1= abs((self.start[1]-self.point[1]))
         if x>y:

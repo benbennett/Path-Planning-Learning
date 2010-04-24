@@ -174,13 +174,6 @@ namespace  planning
 				R  h()
 				{
 					R mr=-1;
-					R max =-1;
-					for(int i=0;i<2;i++)
-					{
-						mr = std::abs(goal_->point_[i] - point_[i]);
-						if(mr>max)
-							max=mr;
-					}	
 					mr=-1;
 					R max2 =-1;
 					for(int i=0;i<2;i++)
