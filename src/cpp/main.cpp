@@ -117,7 +117,9 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	shared_state_def goal = adstar.createState(100,100);
 
 	adstar.init(start,goal);
-    BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+    int mr =  adstar.ComputeorImprovePath();
+	std::cout<<mr<<std::endl;	
+	BOOST_CHECK(mr==100);
 	//not on path to test outside of path 	
 
 	for(int j=2;j<50;j++)
@@ -131,18 +133,22 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	adstar.UpdateAllPriorities();
 	adstar.ClearClosed();
 	adstar.ComputeorImprovePath();
-
+	adstar.getPath();
 	for(int j=50;j<100;j++)
 	{
 		//add spot and call planner again
 		adstar.addForbidden(createState(j,j));	
-
 		adstar.MoveAllFromIncsToOpen();
 		adstar.UpdateAllPriorities();
 		adstar.ClearClosed();
+		cout<<"adaAddForbiddenComplex call "<<j <<","<<j;
 		adstar.ComputeorImprovePath();
 	}
+
+	cout<<"adaAddForbiddenComplex done getting through points 50 50 99,99 line"<<endl; 
 	std::list< shared_state_def > final_path = adstar.getPath();
+
+	cout<<"got path "<<endl; 
 	std::list< shared_state_def >::iterator iter_path;
 	iter_path= final_path.end();
 	iter_path--;
@@ -155,8 +161,11 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	iter_path = final_path.begin();
 	//should be a diagonal so we will check it.	
 	int i=2;
+
 	while(i<100)
 	{
+
+		cout<<" Checking path"<<endl;
 		hold= (*iter_path)->getPoint();
 		BOOST_CHECK(!(hold[0]==i && hold[1]==i));
 		i++;
@@ -191,7 +200,7 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 	shared_state_def goal = adstar.createState(100,100);
 
 	adstar.init(start,goal);
-    BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+    BOOST_CHECK(adstar.ComputeorImprovePath()==100);
 	//not on path to test outside of path 	
 		
 	adstar.addForbidden(createState(4,5));	
@@ -234,7 +243,7 @@ BOOST_AUTO_TEST_CASE(adasimpletest)
 
 
 	adstar.init(start,goal);
-    BOOST_CHECK(adstar.ComputeorImprovePath()==99);
+    BOOST_CHECK(adstar.ComputeorImprovePath()==100);
 	std::list< shared_state_def > final_path = adstar.getPath();
 	std::list< shared_state_def >::iterator iter_path;
 	iter_path= final_path.end();
