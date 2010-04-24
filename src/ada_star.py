@@ -202,7 +202,7 @@ class AnytimeDstar:
         self.INCONS = set()
 if __name__== "__main__": 
     start=(1,1)
-    goal=(11,11)
+    goal=(100,100)
     forbidden= set()
 
     #x,y  grid 10x10
@@ -236,8 +236,17 @@ if __name__== "__main__":
     aDstart.addForbidden((5,7))
     aDstart.addForbidden((5,4))
     aDstart.addForbidden((5,5))
+
     aDstart.moveAllFromIncsToOpen()
     aDstart.UpdateAllPriorities()
     aDstart.CLOSED = set()
     aDstart.ComputeorImprovePath() 
+
+    for i in range(5,99):
+        aDstart.addForbidden((i,i))
+        aDstart.moveAllFromIncsToOpen()
+        aDstart.UpdateAllPriorities()
+        aDstart.CLOSED = set()
+        aDstart.ComputeorImprovePath() 
+
     print aDstart.getPath()
