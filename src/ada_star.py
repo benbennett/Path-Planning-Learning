@@ -135,7 +135,6 @@ class AnytimeDstar:
         for s in states:
             self.OPEN[s] = self.keys(s)
     def UpdateState(self,s):
-
         if not s.isGoal():
             s.set_rhs(s.min_of_successors())
         if s in self.OPEN :
@@ -200,6 +199,34 @@ class AnytimeDstar:
             self.OPEN[aS] = self.keys(aS)
         self.INCONS = set()
 if __name__== "__main__": 
+    start=(5,0)
+    goal=(0,6)
+    forbidden= set()
+
+    #x,y  grid 10x10
+    sX =  numpy.zeros((140,140),dtype=numpy.int)
+    #x,y action space
+    Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
+    state_trans = StateTranSpace(state_space=sX,action_space=Ux)
+    #can move up down left right
+    aDstart =  AnytimeDstar(start,goal,state_trans)
+
+    #change to have example from paper.
+
+    '''When changing the edge cost or graph one must
+       Move all states to the open state.
+        update all the priorities
+        set the closed state to the empty set. 
+        then call ComputeorImprovePath '''
+
+    forbids = [
+            (0,0),(1,0),(2,0),(3,0),(4,0),(4,1),(4,2),(2,2),(1,2),(1,3),(1,4),(1,5),
+            (2,5),(3,5),(4,5) ] 
+    for x in forbids:
+        aDstart.addForbidden(x)
+    aDstart.ComputeorImprovePath() 
+    
+    print aDstart.getPath() 
     start=(1,1)
     goal=(100,100)
     forbidden= set()
@@ -235,14 +262,22 @@ if __name__== "__main__":
     aDstart.addForbidden((5,7))
     aDstart.addForbidden((5,4))
     aDstart.addForbidden((5,5))
+    start=(1,1)
+    goal=(250,250)
+    forbidden= set()
 
-    aDstart.moveAllFromIncsToOpen()
-    aDstart.UpdateAllPriorities()
-    aDstart.CLOSED = set()
+    #x,y  grid 10x10
+    sX =  numpy.zeros((500,500),dtype=numpy.int)
+    #x,y action space
+    Ux =  numpy.array([[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])
+    state_trans = StateTranSpace(state_space=sX,action_space=Ux)
+    #can move up down left right
+    aDstart =  AnytimeDstar(start,goal,state_trans)
     aDstart.ComputeorImprovePath() 
 
-    for i in range(5,99):
-        aDstart.addForbidden((i,i))
+
+    for i in range(5,200):
+       #aDstart.addForbidden((i,i+2))
         aDstart.moveAllFromIncsToOpen()
         aDstart.UpdateAllPriorities()
         aDstart.CLOSED = set()
