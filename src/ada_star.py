@@ -286,10 +286,9 @@ if __name__== "__main__":
 
 
     for i in range(5,200):
-       #aDstart.addForbidden((i,i+2))
+        aDstart.addForbidden((i,i))
         aDstart.moveAllFromIncsToOpen()
         aDstart.UpdateAllPriorities()
         aDstart.CLOSED = set()
         aDstart.ComputeorImprovePath() 
-
-    print aDstart.getPath()
+        print aDstart.getPath()
