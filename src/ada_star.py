@@ -100,6 +100,7 @@ class AnytimeDstar:
         self.eps = 2.5 # TODO make it change during iterations. 
         self.PREC = {}
         self.G = {} 
+        self.path_= {}
         self.G[self.s_start] = self.s_start
         self.forbidden = forbidden#TODO add "obstacles" 
         self.OPEN[self.s_goal] = self.keys(self.s_goal)
@@ -171,10 +172,18 @@ class AnytimeDstar:
         print states 
     def getPath(self):
         curP = aDstart.get_start()
-        path = [] 
+        path = []
+        self.path_=set()
+        self.path_.add(curP)
         while(curP!=None):
             path.append(curP)
             curP = curP.get_min_succesor()
+            if curP in self.path_:
+                err = str(curP)
+                print path
+                raise Exception('Cycle detected'+err)
+            
+            self.path_.add(curP)
         return path
     def addForbidden(self,point):
         if point in self.forbidden:
