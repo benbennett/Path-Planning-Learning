@@ -361,7 +361,6 @@ namespace  planning
 							{
 								hold_update_state = succ_iter->second;
 								buildState(hold_update_state);
-								assert(hold_update_state->getSuccessors().size()>0);
 								UpdateState(hold_update_state);
 								succ_iter++;
 							}
