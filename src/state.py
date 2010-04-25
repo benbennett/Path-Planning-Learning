@@ -67,7 +67,8 @@ class State:
         states) to the goal
         """
         return self.gofs     
-    
+    def set_start(self,start):
+        self.start=start.point
     def set_g(self,g):
         self.gofs= g
 
