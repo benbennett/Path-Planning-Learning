@@ -5,8 +5,8 @@ project (ADA_STAR)
 #BOOST_ROOT=/e/programs/boost_1_35_0
 #BOOST_LIBRARYDIR=$BOOST_ROOT/stage/lib
 find_package( Boost 1.37 COMPONENTS  regex unit_test_framework ) #NOTE note used for future use. 
-set(CMAKE_EXE_LINKER_FLAGS " -pg")
-#set( CMAKE_BUILD_TYPE Debug)
+set(CMAKE_EXE_LINKER_FLAGS " -pg -ggdb")
+set( CMAKE_BUILD_TYPE Debug)
 add_executable(ada_star_bin ada_star.cpp main.cpp )
 message(STATUS "Boost: ${Boost_LIBRARIES}" )
 target_link_libraries(ada_star_bin ${Boost_LIBRARIES} )
