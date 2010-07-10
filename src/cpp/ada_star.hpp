@@ -107,6 +107,15 @@ namespace  planning
 				{
 					start_ = start;
 				}
+				void moveStart(Z first, Z second)
+				{
+				   shared_state_def  hold_state = this->createState(first,second);
+				   this->buildState(hold_state);
+				   hold_state->setStart(hold_state);
+					 eps_=3.0;
+					 start_  = hold_state;
+					 start_->setGoal(goal_);
+				}
 				shared_state_def getStart()
 				{
 					return start_;
