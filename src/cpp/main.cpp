@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE AnyDstar 
 #include <boost/test/unit_test.hpp>
-
+using namespace std;
 BOOST_AUTO_TEST_CASE(testKeyClass)
 {
 	using namespace planning;	
@@ -106,6 +106,7 @@ inline std::vector<int> createState(int x, int y)
 BOOST_AUTO_TEST_CASE(StateTestCase)
 {
 
+	cout<<"StateTestCase"<<endl;
 	using namespace planning;
 	shared_ptr < int> null_test;
 	BOOST_CHECK(null_test==NULL);
@@ -129,7 +130,7 @@ BOOST_AUTO_TEST_CASE(StateTestCase)
 
 BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 {
-
+	cout<<"adaAddForbiddenComplex"<<endl;
 	using namespace planning;
 	using namespace std;
 	typedef  State<int,double> aState;
@@ -143,7 +144,8 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	shared_state_def goal = adstar.createState(100,100);
 
 	adstar.init(start,goal);
-    int mr =  adstar.ComputeorImprovePath();
+	int mr =  adstar.ComputeorImprovePath();
+
 	std::cout<<mr<<std::endl;	
 	BOOST_CHECK(mr==100);
 	//not on path to test outside of path 	
@@ -152,13 +154,16 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	{
 		//add a bunch
 		adstar.addForbidden(createState(j,j));	
-
+		std::cout<<mr<<std::endl;	
 	}
 
 	adstar.MoveAllFromIncsToOpen();
 	adstar.UpdateAllPriorities();
 	adstar.ClearClosed();
-	adstar.ComputeorImprovePath();
+	mr = adstar.ComputeorImprovePath();
+
+	std::cout<<mr<<std::endl;	
+
 	adstar.getPath();
 	for(int j=50;j<100;j++)
 	{
@@ -167,8 +172,10 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 		adstar.MoveAllFromIncsToOpen();
 		adstar.UpdateAllPriorities();
 		adstar.ClearClosed();
-		cout<<"adaAddForbiddenComplex call "<<j <<","<<j;
-		adstar.ComputeorImprovePath();
+		cout<<"adaAddForbiddenComplex call "<<j <<","<<j<<endl;
+		mr = adstar.ComputeorImprovePath();
+
+		std::cout<<mr<<std::endl;	
 	}
 
 	cout<<"adaAddForbiddenComplex done getting through points 50 50 99,99 line"<<endl; 
@@ -210,7 +217,7 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(adaAddForbidden)
+BOOST_AUTO_TEST_CASE(adaMoveStart)
 {
 
 	using namespace planning;
@@ -225,8 +232,67 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 	shared_state_def start = adstar.createState(1,1);
 	shared_state_def goal = adstar.createState(100,100);
 
+	cout<<"adaMoveStart"<<endl;
 	adstar.init(start,goal);
-    BOOST_CHECK(adstar.ComputeorImprovePath()==100);
+	int mr =  adstar.ComputeorImprovePath();
+	std::cout<<mr<<std::endl;	
+	BOOST_CHECK(mr==100);
+	//not on path to test outside of path 	
+
+	for(int j=20;j<50;j++)
+	{
+		//add a bunch
+		adstar.addForbidden(createState(j,j));	
+
+	}
+
+	adstar.MoveAllFromIncsToOpen();
+	adstar.UpdateAllPriorities();
+	adstar.ClearClosed();
+	adstar.ComputeorImprovePath();
+	adstar.getPath();
+	for(int j=2;j<15;j++)
+	{
+		//add spot and call planner again
+		cout<<"adaMoveStart"<<j<<endl;
+		adstar.moveStart(j,j);	
+		adstar.MoveAllFromIncsToOpen();
+		adstar.UpdateAllPriorities();
+		adstar.ClearClosed();
+		adstar.ComputeorImprovePath();
+	}
+
+	std::list< shared_state_def > final_path = adstar.getPath();
+
+	cout<<"got path "<<endl; 
+	std::list< shared_state_def >::iterator iter_path;
+	iter_path= final_path.end();
+	iter_path--;
+	std::vector<int> hold= (*iter_path)->getPoint();
+	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
+	
+	BOOST_CHECK(hold[0]==100);
+	BOOST_CHECK(hold[1]==100);
+    	
+}
+BOOST_AUTO_TEST_CASE(adaAddForbidden)
+{
+
+	cout<<"adaAddForbidden"<<endl;
+	using namespace planning;
+	using namespace std;
+	typedef  State<int,double> aState;
+	typedef  AnytimeDstar<int,double> ADStar_def;
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+
+	typedef  shared_ptr< State<int,double> > shared_state_def;
+	ADStar_def adstar;
+	
+	shared_state_def start = adstar.createState(1,1);
+	shared_state_def goal = adstar.createState(100,100);
+
+	adstar.init(start,goal);
+	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
 	//not on path to test outside of path 	
 		
 	adstar.addForbidden(createState(4,5));	
@@ -255,6 +321,7 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 BOOST_AUTO_TEST_CASE(adasimpletest)
 {
 
+	cout<<"adasimpletest"<<endl;
 	using namespace planning;
 	using namespace std;
 	typedef  State<int,double> aState;
@@ -269,7 +336,7 @@ BOOST_AUTO_TEST_CASE(adasimpletest)
 
 
 	adstar.init(start,goal);
-    BOOST_CHECK(adstar.ComputeorImprovePath()==100);
+	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
 	std::list< shared_state_def > final_path = adstar.getPath();
 	std::list< shared_state_def >::iterator iter_path;
 	iter_path= final_path.end();
