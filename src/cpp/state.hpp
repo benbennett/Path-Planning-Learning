@@ -154,7 +154,7 @@ namespace  planning
 
 				R  getMinSuccessorValue()
 				{
-					getMinSuccessor();
+					boost::shared_ptr< State<Z,R> > mr= getMinSuccessor();
 					return min_successor_value_;	
 				}
 				void removeSuccessor(shared_ptr< State<Z,R> > in)
