@@ -52,7 +52,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 namespace  planning 
 {
 
-
+	using namespace std;
 	template<typename Z, typename R> 
 		class AnytimeDstar
 		{
@@ -60,17 +60,12 @@ namespace  planning
 				shared_ptr < State < Z, R> > start_; 
 				shared_ptr < State < Z, R> > goal_; 
 
-				typedef State<Z,R> state_def;	
-				typedef shared_ptr < State<Z,R> > shared_state_def;	
-				typedef std::vector<Z> vectorZ;
-				typedef Key<Z,R> key_def;
-				typedef std::map< std::vector<Z>, shared_state_def > state_map_def;			
 
-				std::map< vectorZ , Z > forbidden_;
-				std::map< vectorZ , shared_state_def > states_;
-				std::priority_queue< key_def, std::vector< key_def  >,std::greater< key_def >  > open_;
-				std::map< vectorZ , shared_state_def > incons_;
-				std::map< vectorZ , shared_state_def > closed_ ;
+				map< vector<Z> , Z > forbidden_;
+				map< vector<Z> , shared_ptr< State<Z, R > > > states_;
+				priority_queue< Key<Z,R>, vector< Key<Z,R>  >,greater< Key<Z,R> >  > open_;
+				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
+				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
 			public:
 				AnytimeDstar()
@@ -78,7 +73,7 @@ namespace  planning
 					eps_=3.0;
 				}
 
-				void init(shared_state_def start,shared_state_def goal )
+				void init(shared_ptr< State<Z, R > > start,shared_ptr< State<Z, R > > goal )
 				{
 					eps_=3.0;
 					start_  = start;
@@ -87,10 +82,10 @@ namespace  planning
 					goal_->setStart(start);
 					goal_->setRhs(0);
 					goal_->in_queue_=true;	
-					key_def goal_key(goal_,eps_);
+					Key<Z,R> goal_key(goal_,eps_);
 					open_.push(goal_key);
 				}
-				void setForbidden(std::map< vectorZ , shared_state_def > forbidden)
+				void setForbidden(map< vector<Z> , Z > forbidden)
 				{
 					forbidden_ = forbidden;
 
@@ -99,49 +94,49 @@ namespace  planning
 				{
 					eps_ = eps;
 				}   
-				std::map< vectorZ , Z >getForbidden()
+				map< vector<Z> , Z >getForbidden()
 				{
 					return forbidden_;
 				}   
-				void setStart( const shared_state_def & start)
+				void setStart( const shared_ptr< State<Z, R > > & start)
 				{
 					start_ = start;
 				}
 				void moveStart(Z first, Z second)
 				{
-				   shared_state_def  hold_state = this->createState(first,second);
+				   shared_ptr< State<Z, R > >  hold_state = this->createState(first,second);
 				   this->buildState(hold_state);
 				   hold_state->setStart(hold_state);
 					 eps_=3.0;
 					 start_  = hold_state;
 					 start_->setGoal(goal_);
 				}
-				shared_state_def getStart()
+				shared_ptr< State<Z, R > > getStart()
 				{
 					return start_;
 				}
-				bool hasKey(std::vector<Z> point)
+				bool hasKey(vector<Z> point)
 				{
 					return  states_.find(point)!= states_.end(); 
 				}
-				shared_state_def getState( std::vector<Z> point)
+				shared_ptr< State<Z, R > > getState( vector<Z> point)
 				{
 					return  states_.at(point);
 				}
-				void addState( std::vector<Z> point, shared_state_def state)
+				void addState( vector<Z> point, shared_ptr< State<Z, R > > state)
 				{
 					states_[point] = state;
 				}       
-				shared_state_def createState( Z first, Z second)
+				shared_ptr< State<Z, R > > createState( Z first, Z second)
 				{
 					Z  pt[] = {first,second};
-					std::vector<Z> point(pt,pt+2);
+					vector<Z> point(pt,pt+2);
 					if ( hasKey(point))
 					{
 						return states_[point];
 					}
-					shared_state_def  temp_ptr;
-					temp_ptr.reset(new state_def(point));
+					shared_ptr< State<Z, R > >  temp_ptr;
+					temp_ptr.reset(new State<Z,R> (point));
 					if (goal_==NULL)
 						temp_ptr->setGoal(temp_ptr);
 					else
@@ -164,7 +159,7 @@ namespace  planning
 				 *  the priority queue. 
 				 *
 				 */
-				void addForbidden( std::vector<Z> point)
+				void addForbidden( vector<Z> point)
 				{
 
 					if (forbidden_.find(point) != forbidden_.end())
@@ -177,16 +172,16 @@ namespace  planning
 					}
 					//have to go through and disconnect the succ going to the 
 					//current point that is forbidden.
-					shared_state_def state = getState(point);
-					typename state_map_def::iterator  succ_iter;				
-					state_map_def hold_map;
+					shared_ptr< State<Z, R > > state = getState(point);
+					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
+					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 
-					shared_state_def hold_update_state;
+					shared_ptr< State<Z, R > > hold_update_state;
 
 					hold_map =  state->getSuccessors();
 					succ_iter = hold_map.begin();   
-					std::vector< shared_state_def > toUpdate;   
-					typename std::vector<  shared_state_def  >::iterator toUpdate_iter; 
+					vector< shared_ptr< State<Z, R > > > toUpdate;   
+					typename vector<  shared_ptr< State<Z, R > >  >::iterator toUpdate_iter; 
 					while (succ_iter!= hold_map.end())
 					{
 						hold_update_state = succ_iter->second;
@@ -219,7 +214,7 @@ namespace  planning
 				 *
 				 *
 				 */
-				void  buildState( shared_state_def & in)
+				void  buildState( shared_ptr< State<Z, R > > & in)
 				{
 					if(in->getSuccessors().size()==0)
 					{
@@ -235,11 +230,11 @@ namespace  planning
 								Z second = in->getPoint()[1]+y;
 
 								Z  pt[] = {first,second};
-								std::vector<Z> point(pt,pt+2);
+								vector<Z> point(pt,pt+2);
 								//only add succ iff not in forbidden		
 								if (forbidden_.find( point) == forbidden_.end())
 								{
-									shared_state_def hold =createState(first,second);
+									shared_ptr< State<Z, R > > hold =createState(first,second);
 									in->addSuccessor(hold);	
 								}
 							}
@@ -257,18 +252,18 @@ namespace  planning
 				void UpdateAllPriorities()
 				{
 
-					std::priority_queue< key_def, std::vector< key_def  >,std::less< key_def > > newqueue;
+					priority_queue< Key<Z,R>, vector< Key<Z,R>  >,less< Key<Z,R> > > newqueue;
 					while(!open_.empty())
 					{
-						key_def hold = open_.top();
-						newqueue.push( key_def(hold.getState(),eps_));
+						Key<Z,R> hold = open_.top();
+						newqueue.push( Key<Z,R>(hold.getState(),eps_));
 						open_.pop();	
 					}
 
 					while(!newqueue.empty())
 					{
-						key_def hold = newqueue.top();
-						open_.push( key_def(hold.getState(),eps_));
+						Key<Z,R> hold = newqueue.top();
+						open_.push( Key<Z,R>(hold.getState(),eps_));
 						newqueue.pop();
 					}
 				}
@@ -276,11 +271,11 @@ namespace  planning
 				{
 
 
-					typename state_map_def::iterator  iter;	
+					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  iter;	
 					iter =incons_.begin();
 					while(iter!=incons_.end())
 					{
-						open_.push(key_def(iter->second,eps_));
+						open_.push(Key<Z,R>(iter->second,eps_));
 						iter++;	
 					}
 					incons_.clear();
@@ -300,8 +295,9 @@ namespace  planning
 				 *	  else:
 				 *		 put in incons
 				 */
-				void UpdateState( shared_state_def & s)
+				void UpdateState( shared_ptr< State<Z, R > > & s)
 				{
+
 					if( !(s->isGoal()))
 						s->setRhs(s->getMinSuccessorValue());
 					//work around , need a priority map
@@ -311,9 +307,10 @@ namespace  planning
 					{
 						if(closed_.find(s->getPoint())== closed_.end())
 						{
+						  
 							s->in_queue_ = true;
 							assert(s->getSuccessors().size()>0);
-							key_def hold(s,eps_);
+							Key<Z,R> hold(s,eps_);
 							assert(hold.getState()->getSuccessors().size()>0);
 							open_.push(hold);
 
@@ -331,12 +328,12 @@ namespace  planning
 				bool filterQueue()
 				{
 
-					shared_state_def hold_state;
+					shared_ptr< State<Z, R > > hold_state;
 					if(open_.empty())
 						return false;
 					while(!open_.empty()) 
 					{
-						key_def hold(open_.top());
+						Key<Z,R> hold(open_.top());
 						if(hold.getState()->in_queue_==false)
 							open_.pop();
 						else
@@ -349,16 +346,16 @@ namespace  planning
 
 				int ComputeorImprovePath()
 				{
-					key_def hold_key;
-					shared_state_def hold_state;
-					shared_state_def hold_update_state;
+					Key<Z,R> hold_key;
+					shared_ptr< State<Z, R > > hold_state;
+					shared_ptr< State<Z, R > > hold_update_state;
 					//g++ wants the typename in front or it gets confused.	
-					typename state_map_def::iterator  succ_iter;				
-					state_map_def hold_map;
+					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
+					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 					int states = 0;
 					while( filterQueue() && 
-							( key_def(open_.top(),eps_)
-							  < key_def(start_,eps_)
+							( Key<Z,R>(open_.top(),eps_)
+							  < Key<Z,R>(start_,eps_)
 							  || start_->g() != start_->rhs()) )
 					{
 						hold_key =  open_.top();
@@ -408,10 +405,10 @@ namespace  planning
 				/* Utility method to get a list of states from start to goal.
 				 * Not really need , but just a ease of use. 
 				 */	
-				std::list< shared_ptr <  State < Z, R>  >  > getPath()
+				list< shared_ptr <  State < Z, R>  >  > getPath()
 				{
-					std::list< shared_ptr < State < Z, R> > > m_return;
-					//typename state_def hold; 
+					list< shared_ptr < State < Z, R> > > m_return;
+					//typename State<Z,R>  hold; 
 					shared_ptr < State < Z, R> > hold;			
 					hold= start_;
 					do
