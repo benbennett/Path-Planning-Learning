@@ -133,15 +133,11 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	cout<<"adaAddForbiddenComplex"<<endl;
 	using namespace planning;
 	using namespace std;
-	typedef  State<int,double> aState;
-	typedef  AnytimeDstar<int,double> ADStar_def;
-	typedef  shared_ptr< State<int,double> > shared_state_def;
 
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar;
+	AnytimeDstar<int,double> adstar;
 	
-	shared_state_def start = adstar.createState(1,1);
-	shared_state_def goal = adstar.createState(100,100);
+	shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
 
 	adstar.init(start,goal);
 	int mr =  adstar.ComputeorImprovePath();
@@ -179,10 +175,10 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	}
 
 	cout<<"adaAddForbiddenComplex done getting through points 50 50 99,99 line"<<endl; 
-	std::list< shared_state_def > final_path = adstar.getPath();
+	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
 
 	cout<<"got path "<<endl; 
-	std::list< shared_state_def >::iterator iter_path;
+	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
 	iter_path= final_path.end();
 	iter_path--;
 	std::vector<int> hold= (*iter_path)->getPoint();
@@ -222,15 +218,11 @@ BOOST_AUTO_TEST_CASE(adaMoveStart)
 
 	using namespace planning;
 	using namespace std;
-	typedef  State<int,double> aState;
-	typedef  AnytimeDstar<int,double> ADStar_def;
-	typedef  shared_ptr< State<int,double> > shared_state_def;
 
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar;
+	AnytimeDstar<int,double> adstar;
 	
-	shared_state_def start = adstar.createState(1,1);
-	shared_state_def goal = adstar.createState(100,100);
+	shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
 
 	cout<<"adaMoveStart"<<endl;
 	adstar.init(start,goal);
@@ -262,10 +254,10 @@ BOOST_AUTO_TEST_CASE(adaMoveStart)
 		adstar.ComputeorImprovePath();
 	}
 
-	std::list< shared_state_def > final_path = adstar.getPath();
+	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
 
 	cout<<"got path "<<endl; 
-	std::list< shared_state_def >::iterator iter_path;
+	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
 	iter_path= final_path.end();
 	iter_path--;
 	std::vector<int> hold= (*iter_path)->getPoint();
@@ -281,15 +273,10 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 	cout<<"adaAddForbidden"<<endl;
 	using namespace planning;
 	using namespace std;
-	typedef  State<int,double> aState;
-	typedef  AnytimeDstar<int,double> ADStar_def;
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar;
+	AnytimeDstar<int,double> adstar;
 	
-	shared_state_def start = adstar.createState(1,1);
-	shared_state_def goal = adstar.createState(100,100);
+	shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
 
 	adstar.init(start,goal);
 	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
@@ -297,8 +284,8 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 		
 	adstar.addForbidden(createState(4,5));	
 	adstar.ComputeorImprovePath();
-	std::list< shared_state_def > final_path = adstar.getPath();
-	std::list< shared_state_def >::iterator iter_path;
+	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
+	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
 	iter_path= final_path.end();
 	iter_path--;
 	std::vector<int> hold= (*iter_path)->getPoint();
@@ -324,21 +311,16 @@ BOOST_AUTO_TEST_CASE(adasimpletest)
 	cout<<"adasimpletest"<<endl;
 	using namespace planning;
 	using namespace std;
-	typedef  State<int,double> aState;
-	typedef  AnytimeDstar<int,double> ADStar_def;
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-
-	typedef  shared_ptr< State<int,double> > shared_state_def;
-	ADStar_def adstar;
+	AnytimeDstar<int,double> adstar;
 	
-	shared_state_def start = adstar.createState(1,1);
-	shared_state_def goal = adstar.createState(100,100);
+	shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
 
 
 	adstar.init(start,goal);
 	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
-	std::list< shared_state_def > final_path = adstar.getPath();
-	std::list< shared_state_def >::iterator iter_path;
+	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
+	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
 	iter_path= final_path.end();
 	iter_path--;
 	std::vector<int> hold= (*iter_path)->getPoint();
