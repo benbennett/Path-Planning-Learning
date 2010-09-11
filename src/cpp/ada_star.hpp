@@ -256,7 +256,10 @@ namespace  planning
 					while(!open_.empty())
 					{
 						Key<Z,R> hold = open_.top();
-						newqueue.push( Key<Z,R>(hold.getState(),eps_));
+						if (forbidden_.find(hold.getState()->getPoint()) == forbidden_.end())
+						{
+								newqueue.push( Key<Z,R>(hold.getState(),eps_));
+						}
 						open_.pop();	
 					}
 
