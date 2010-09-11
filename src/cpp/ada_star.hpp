@@ -164,7 +164,9 @@ namespace  planning
 
 					if (forbidden_.find(point) != forbidden_.end())
 						return;
+					forbidden_[point] = 0;
 					forbidden_[point] = 0; 
+					cout<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
 					if (!hasKey(point))
 					{
 						//do not have to do anything if point has not be visited. 
