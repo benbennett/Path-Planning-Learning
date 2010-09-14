@@ -127,6 +127,41 @@ BOOST_AUTO_TEST_CASE(StateTestCase)
 
 }
 
+BOOST_AUTO_TEST_CASE(Aadasimpletest)
+{
+
+	cout<<"adasimpletest"<<endl;
+	using namespace planning;
+	using namespace std;
+	AnytimeDstar<int,double> adstar;
+	
+	shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
+
+
+	adstar.init(start,goal);
+	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
+	cout<<"Planning successful, running new test"<<endl;		
+	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
+	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
+	iter_path= final_path.end();
+	iter_path--;
+	std::vector<int> hold= (*iter_path)->getPoint();
+	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
+	BOOST_CHECK(hold[0]==100);
+	BOOST_CHECK(hold[1]==100);
+	iter_path = final_path.begin();
+	//should be a diagonal so we will check it.	
+	int i=2;
+	while(iter_path!=final_path.end())
+	{
+		hold= (*iter_path)->getPoint();
+		BOOST_CHECK(hold[0]==i);
+		BOOST_CHECK(hold[1]==i);
+		i++;
+		iter_path++;
+	}
+}
 
 BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 {
@@ -153,9 +188,6 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 		std::cout<<mr<<std::endl;	
 	}
 
-	adstar.MoveAllFromIncsToOpen();
-	adstar.UpdateAllPriorities();
-	adstar.ClearClosed();
 	mr = adstar.ComputeorImprovePath();
 
 	std::cout<<mr<<std::endl;	
@@ -165,9 +197,6 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	{
 		//add spot and call planner again
 		adstar.addForbidden(createState(j,j));	
-		adstar.MoveAllFromIncsToOpen();
-		adstar.UpdateAllPriorities();
-		adstar.ClearClosed();
 		cout<<"adaAddForbiddenComplex call "<<j <<","<<j<<endl;
 		mr = adstar.ComputeorImprovePath();
 
@@ -238,9 +267,6 @@ BOOST_AUTO_TEST_CASE(adaMoveStart)
 
 	}
 
-	adstar.MoveAllFromIncsToOpen();
-	adstar.UpdateAllPriorities();
-	adstar.ClearClosed();
 	adstar.ComputeorImprovePath();
 	adstar.getPath();
 	for(int j=2;j<15;j++)
@@ -248,9 +274,6 @@ BOOST_AUTO_TEST_CASE(adaMoveStart)
 		//add spot and call planner again
 		cout<<"adaMoveStart"<<j<<endl;
 		adstar.moveStart(j,j);	
-		adstar.MoveAllFromIncsToOpen();
-		adstar.UpdateAllPriorities();
-		adstar.ClearClosed();
 		adstar.ComputeorImprovePath();
 	}
 
@@ -305,37 +328,3 @@ BOOST_AUTO_TEST_CASE(adaAddForbidden)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(adasimpletest)
-{
-
-	cout<<"adasimpletest"<<endl;
-	using namespace planning;
-	using namespace std;
-	AnytimeDstar<int,double> adstar;
-	
-	shared_ptr< State<int, double> > start = adstar.createState(1,1);
-	shared_ptr< State<int, double> > goal = adstar.createState(100,100);
-
-
-	adstar.init(start,goal);
-	BOOST_CHECK(adstar.ComputeorImprovePath()==100);
-	std::list< shared_ptr< State<int, double> > > final_path = adstar.getPath();
-	std::list< shared_ptr< State<int, double> > >::iterator iter_path;
-	iter_path= final_path.end();
-	iter_path--;
-	std::vector<int> hold= (*iter_path)->getPoint();
-	std::cout<<hold[0]<<","<<hold[1]<<std::endl;	
-	BOOST_CHECK(hold[0]==100);
-	BOOST_CHECK(hold[1]==100);
-	iter_path = final_path.begin();
-	//should be a diagonal so we will check it.	
-	int i=2;
-	while(iter_path!=final_path.end())
-	{
-		hold= (*iter_path)->getPoint();
-		BOOST_CHECK(hold[0]==i);
-		BOOST_CHECK(hold[1]==i);
-		i++;
-		iter_path++;
-	}
-}

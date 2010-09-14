@@ -62,14 +62,14 @@ namespace  planning
 				boost::shared_ptr < State < Z, R> > goal_; 
 
 
-				map< vector<long>, shared_ptr< State<Z,R> > > path_map_;
+				map< vector<Z>, shared_ptr< State<Z,R> > > path_map_;
 				map< vector<Z> , Z > forbidden_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > states_;
 				priority_queue< Key<Z,R>, vector< Key<Z,R>  >,greater< Key<Z,R> >  > open_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
-		private:
+		public:
 				list< shared_ptr < State < Z, R> > > path_;
 				bool never_built_;
 		public:
@@ -369,6 +369,7 @@ namespace  planning
 								cout<<"Start:"<<start_;
 								mr= ComputePath(start_);
 								never_built_=false;
+								mr = buildPath();
 								if(mr>=0)
 								{
 										cout<<"First time planning successful."<<endl;
@@ -465,10 +466,10 @@ namespace  planning
 					}
 					return states;
 				}
-				inline std::vector<long> get_key(long x, long y)
+				inline std::vector<Z> get_key(Z x, Z y)
 				{
-					long point[] = {x,y};
-					std::vector<long> key(point,point+2);
+					Z point[] = {x,y};
+					std::vector<Z> key(point,point+2);
 					return key;
 				}
 				/* Utility method to get a list of states from start to goal.
