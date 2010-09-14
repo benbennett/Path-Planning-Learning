@@ -47,6 +47,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
+#include "stacktrace.hpp"
 #include "state.hpp"
 #include "key.hpp"
 namespace  planning 
@@ -57,20 +58,25 @@ namespace  planning
 		class AnytimeDstar
 		{
 			public:
-				shared_ptr < State < Z, R> > start_; 
-				shared_ptr < State < Z, R> > goal_; 
+				boost::shared_ptr < State < Z, R> > start_; 
+				boost::shared_ptr < State < Z, R> > goal_; 
 
 
+				map< vector<long>, shared_ptr< State<Z,R> > > path_map_;
 				map< vector<Z> , Z > forbidden_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > states_;
 				priority_queue< Key<Z,R>, vector< Key<Z,R>  >,greater< Key<Z,R> >  > open_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
-			public:
+		private:
+				list< shared_ptr < State < Z, R> > > path_;
+				bool never_built_;
+		public:
 				AnytimeDstar()
 				{
 					eps_=3.0;
+					never_built_=true;
 				}
 
 				void init(shared_ptr< State<Z, R > > start,shared_ptr< State<Z, R > > goal )
@@ -84,6 +90,7 @@ namespace  planning
 					goal_->in_queue_=true;	
 					Key<Z,R> goal_key(goal_,eps_);
 					open_.push(goal_key);
+					never_built_=true;
 				}
 				void setForbidden(map< vector<Z> , Z > forbidden)
 				{
@@ -98,7 +105,7 @@ namespace  planning
 				{
 					return forbidden_;
 				}   
-				void setStart( const shared_ptr< State<Z, R > > & start)
+				void setStart( const shared_ptr< State<Z, R > >  start)
 				{
 					start_ = start;
 				}
@@ -251,6 +258,7 @@ namespace  planning
 				 *
 				 *
 				 */
+		private:
 				void UpdateAllPriorities()
 				{
 
@@ -258,7 +266,11 @@ namespace  planning
 					while(!open_.empty())
 					{
 						Key<Z,R> hold = open_.top();
-						if (forbidden_.find(hold.getState()->getPoint()) == forbidden_.end())
+						if ( 
+							  forbidden_.find(hold.getState()->getPoint()) == forbidden_.end()
+								&& 
+								hold.getState()->getSuccessors().size()>0
+								)
 						{
 								newqueue.push( Key<Z,R>(hold.getState(),eps_));
 						}
@@ -300,7 +312,7 @@ namespace  planning
 				 *	  else:
 				 *		 put in incons
 				 */
-				void UpdateState( shared_ptr< State<Z, R > > & s)
+				void UpdateState( shared_ptr< State<Z, R > >  s)
 				{
 
 					if( !(s->isGoal()))
@@ -348,8 +360,49 @@ namespace  planning
 						return false;
 					return true;	
 				}
-
+		public:
 				int ComputeorImprovePath()
+				{
+						int mr;
+						if(never_built_)
+						{
+								cout<<"Start:"<<start_;
+								mr= ComputePath(start_);
+								never_built_=false;
+								if(mr>=0)
+								{
+										cout<<"First time planning successful."<<endl;
+										return mr;
+								}
+
+						}
+						for(int i=0;i<5;i++)
+						{
+								MoveAllFromIncsToOpen();
+								UpdateAllPriorities();
+								ClearClosed();
+								mr= ComputePath(start_);
+								if(mr>=0)
+								{
+										mr = buildPath();
+								}
+								if(mr>=0)
+								{
+										cout<<"Planning successful."<<endl;
+										return mr;
+								}
+								else
+								{
+										cout<<"Planning failed, trying to replan."<<endl;
+										
+								}
+
+						}
+						cout<<"Need to replan from scratch."<<endl;
+						return -1;
+				}
+		private:
+				int ComputePath(shared_ptr < State < Z, R> >   start)
 				{
 					Key<Z,R> hold_key;
 					shared_ptr< State<Z, R > > hold_state;
@@ -358,14 +411,17 @@ namespace  planning
 					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
 					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 					int states = 0;
+					buildState(start);
 					while( filterQueue() && 
 							( Key<Z,R>(open_.top(),eps_)
-							  < Key<Z,R>(start_,eps_)
-							  || start_->g() != start_->rhs()) )
+							  < Key<Z,R>(start,eps_)
+							  || start->g() != start->rhs()) )
 					{
 						hold_key =  open_.top();
 						hold_state = hold_key.getState();	
 						hold_state->in_queue_=false;
+						hold_state->setStart(start);
+						hold_state->visited_=true;
 						open_.pop();
 						states++;
 						if( hold_state->g() > hold_state->rhs())
@@ -383,6 +439,7 @@ namespace  planning
 								assert(succ_iter->second!=NULL);
 								assert(succ_iter->second!=NULL);
 								buildState(hold_update_state);
+								hold_update_state->setStart(start);
 								UpdateState(hold_update_state);
 								succ_iter++;
 							}
@@ -399,6 +456,7 @@ namespace  planning
 							{
 								hold_update_state = succ_iter->second;
 								buildState(hold_update_state);
+								hold_update_state->setStart(start);
 								UpdateState(hold_update_state);
 								succ_iter++;
 							}
@@ -407,25 +465,55 @@ namespace  planning
 					}
 					return states;
 				}
+				inline std::vector<long> get_key(long x, long y)
+				{
+					long point[] = {x,y};
+					std::vector<long> key(point,point+2);
+					return key;
+				}
 				/* Utility method to get a list of states from start to goal.
 				 * Not really need , but just a ease of use. 
 				 */	
+		public:
 				list< shared_ptr <  State < Z, R>  >  > getPath()
 				{
-					list< shared_ptr < State < Z, R> > > m_return;
+						return path_;
+				}
+		private:
+				int buildPath()
+				{
+				  path_.clear();
 					//typename State<Z,R>  hold; 
 					shared_ptr < State < Z, R> > hold;			
-					hold= start_;
+					shared_ptr < State < Z, R> > prev;			
+					hold = prev= start_;
+					path_map_.clear();
+
 					do
-					{					
+					{	
 						//you shouldn't need the beginning
 						//because that is where you are starting.	
 						hold = hold->getMinSuccessor();
-						m_return.push_back(hold);
+						if(path_map_.find(hold->getPoint())!=path_map_.end())
+						{
+								typename list< boost::shared_ptr < State < Z, R> > >::iterator  path_iter;
+								path_iter=path_.begin();
+								cout<<"Cycle detected, will attempt to replan"<<endl;
+								while(path_iter!=path_.end())
+								{
+										cout<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
+										path_iter++;
+								}
+								cout<<*hold<<endl;
+								throw 1;
+						}
+						path_map_[hold->getPoint()] =prev; 
+						path_.push_back(hold);
+						prev = hold;
+
 					}
 					while(hold!=goal_);
-					return m_return;	
-					//hold = start_->getMinSuccessor(); 
+					return 1;
 				}
 		};
 }

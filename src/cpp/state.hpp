@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
+#include "stacktrace.hpp"
 namespace  planning 
 {
 
@@ -53,8 +54,10 @@ namespace  planning
 				typedef std::vector<Z> tuple;
 				bool in_queue_;
 			public:
+				bool visited_;
 				tuple point_;
 				R rhs_value_;
+				R cost_;
 				R gofs_;
 				//Have to use a pointer , otherwise it is incomplete type. 
 				//IE doesn't know how to istatinate a instance 
@@ -77,40 +80,47 @@ namespace  planning
 				State():successors_()
 				{
 					in_queue_= false;
+					cost_=1;
 					clear();
+					visited_=false;
 				}
 				State(tuple pos):successors_()
 				{
 
 					in_queue_= false;
+					cost_=1;
 					clear();
 					this->point_= pos;
-
+					visited_=false;
 				}
 				State(boost::shared_ptr< State <Z,R> >  goal,tuple pos){
 
 					in_queue_= false;
+					cost_=1;
 					clear();
 					goal_  = goal;
+					visited_=false;
 				}
 				State(tuple pos, boost::shared_ptr< State <Z,R> >  start,boost::shared_ptr< State <Z,R> >  goal):successors_()
 				{
 					in_queue_= false;
+					cost_=1;
 					clear();
 					start_ = start;
 					point_ = pos;
 					goal_  = goal;
+					visited_=false;
 				}
-				void setStart(boost::shared_ptr< State <Z,R> > & start)
+				void setStart(boost::shared_ptr< State <Z,R> >  start)
 				{
 					start_ = start;
 				}
 
-				void setGoal(boost::shared_ptr< State <Z,R> > & goal)
+				void setGoal(boost::shared_ptr< State <Z,R> > goal)
 				{
 					goal_ = goal;
 				}
-				friend std::size_t  hash_value(State<Z,R> const & in)
+				friend std::size_t  hash_value(State<Z,R> const in)
 				{
 					std::size_t seed=0;
 					boost::hash_combine(seed,in.point_[0]);
@@ -134,6 +144,7 @@ namespace  planning
 						std::stringstream ss(std::stringstream::out); 
 						ss<<"("<<point_[0]<<","<<point_[1]<<")"<< "call to getSuccessors no successors "<<std::endl;
 						std::cerr<<ss.str();
+						stacktrace();
 						throw 20; 
 					}
 					pos	= successors_.begin();
@@ -178,18 +189,23 @@ namespace  planning
 					rhs_value_ = in; 	
 				}
 
-				R csprimeGsprime(State<Z,R>  & sprime  ) 
+				R csprimeGsprime(State<Z,R>   sprime  ) 
 				{
-					return R( cost(sprime) + sprime.g() ) ;
+				  R cost_r =R( cost(sprime) + sprime.g() );
+					return  cost_r;
 				}
-
-				R cost(State<Z,R> const & sprime) 
+				void set_cost(R cost_in)
 				{
-					return R (1) ;
+						cost_= cost_in;
+				}
+				R cost(State<Z,R> const  sprime) 
+				{
+					return sprime.cost_;
 				}
 
 				R g()
 				{
+				
 					return gofs_;
 				}
 
