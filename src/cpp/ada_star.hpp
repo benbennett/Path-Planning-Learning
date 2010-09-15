@@ -441,7 +441,6 @@ namespace  planning
 							closed_[hold_state->getPoint()]= hold_state;
 							buildState(hold_state);
 							assert(hold_state->getSuccessors().size()>0);
-							UpdateState(hold_state);
 							hold_map = hold_state->getSuccessors();
 							succ_iter = hold_map.begin();
 							while(succ_iter!= hold_map.end())
