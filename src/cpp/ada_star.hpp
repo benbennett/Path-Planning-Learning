@@ -369,8 +369,10 @@ namespace  planning
 								cout<<"Start:"<<start_;
 								mr= ComputePath(start_);
 								never_built_=false;
-								mr = buildPath();
+								int bp;
 								if(mr>=0)
+								 bp= buildPath();
+								if(bp>=0)
 								{
 										cout<<"First time planning successful."<<endl;
 										return mr;
@@ -383,13 +385,12 @@ namespace  planning
 								UpdateAllPriorities();
 								ClearClosed();
 								mr= ComputePath(start_);
+								int bp;
 								if(mr>=0)
+								 bp= buildPath();
+								if(bp>=0)
 								{
-										mr = buildPath();
-								}
-								if(mr>=0)
-								{
-										cout<<"Planning successful."<<endl;
+										cout<<"First time planning successful."<<endl;
 										return mr;
 								}
 								else
@@ -483,7 +484,7 @@ namespace  planning
 		private:
 				int buildPath()
 				{
-				  path_.clear();
+					path_.clear();
 					//typename State<Z,R>  hold; 
 					shared_ptr < State < Z, R> > hold;			
 					shared_ptr < State < Z, R> > prev;			
