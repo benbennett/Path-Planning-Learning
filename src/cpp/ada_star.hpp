@@ -213,7 +213,6 @@ namespace  planning
 					{
 						cout<<"update state:"<<**toUpdate_iter;
 						UpdateState(*toUpdate_iter);
-						(*toUpdate_iter)->getMinSuccessor();   
 						toUpdate_iter++;
 					}
 
