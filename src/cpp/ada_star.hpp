@@ -211,6 +211,7 @@ namespace  planning
 					toUpdate_iter = toUpdate.begin();
 					while (toUpdate_iter != toUpdate.end())
 					{
+						cout<<"update state:"<<**toUpdate_iter;
 						UpdateState(*toUpdate_iter);
 						(*toUpdate_iter)->getMinSuccessor();   
 						toUpdate_iter++;
@@ -324,16 +325,23 @@ namespace  planning
 					{
 						if(closed_.find(s->getPoint())== closed_.end())
 						{
-						  
 							s->in_queue_ = true;
 							assert(s->getSuccessors().size()>0);
 							Key<Z,R> hold(s,eps_);
 							assert(hold.getState()->getSuccessors().size()>0);
+							cout<<"Putt in open: "<<hold<<endl;  
 							open_.push(hold);
 
 						}
 						else
+						{
+							cout<<"Putt in incos"<<*s<<endl;  
 							incons_[s->getPoint()] = s;
+						}
+					}
+					else
+					{
+							cout<<"Didn't do anything"<<*s<<endl;  
 					}			
 				}
 				/* Clears out all points that should be removed from the queue.
@@ -421,6 +429,7 @@ namespace  planning
 					{
 						hold_key =  open_.top();
 						hold_state = hold_key.getState();	
+						cout<<"state:"<<*hold_state<<endl;
 						hold_state->in_queue_=false;
 						hold_state->setStart(start);
 						hold_state->visited_=true;
