@@ -185,14 +185,12 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 	{
 		//add a bunch
 		adstar.addForbidden(createState(j,j));	
+		mr = adstar.ComputeorImprovePath();
 		std::cout<<mr<<std::endl;	
 	}
 
-	mr = adstar.ComputeorImprovePath();
 
-	std::cout<<mr<<std::endl;	
 
-	adstar.getPath();
 	for(int j=50;j<100;j++)
 	{
 		//add spot and call planner again
