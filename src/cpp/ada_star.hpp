@@ -50,6 +50,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include "stacktrace.hpp"
 #include "state.hpp"
 #include "key.hpp"
+#include "priority_dict.hpp"
 namespace  planning 
 {
 
@@ -65,7 +66,7 @@ namespace  planning
 				map< vector<Z>, shared_ptr< State<Z,R> > > path_map_;
 				map< vector<Z> , Z > forbidden_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > states_;
-				priority_queue< Key<Z,R>, vector< Key<Z,R>  >,greater< Key<Z,R> >  > open_;
+				priority_dict< vector<Z> , Key<Z,R>  > open_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
@@ -262,7 +263,7 @@ namespace  planning
 				void UpdateAllPriorities()
 				{
 
-					priority_queue< Key<Z,R>, vector< Key<Z,R>  >,less< Key<Z,R> > > newqueue;
+					priority_dict< vector<Z>, Key<Z,R>  > newqueue;
 					while(!open_.empty())
 					{
 						Key<Z,R> hold = open_.top();
@@ -312,19 +313,19 @@ namespace  planning
 				 *	  else:
 				 *		 put in incons
 				 */
-				void UpdateState( shared_ptr< State<Z, R > >  s)
+				void UpdateState( shared_ptr< State<Z, R > >  s )
 				{
 
 					if( !(s->isGoal()))
 						s->setRhs(s->getMinSuccessorValue());
-					//work around , need a priority map
-					if( s->in_queue_)
-						s->in_queue_=false;
+					if(open_.contains(s->getPoint()))
+					{
+						open_.remove(s->getPoint());
+					}
 					if(s->g() != s->rhs())
 					{
 						if(closed_.find(s->getPoint())== closed_.end())
 						{
-							s->in_queue_ = true;
 							assert(s->getSuccessors().size()>0);
 							Key<Z,R> hold(s,eps_);
 							assert(hold.getState()->getSuccessors().size()>0);
@@ -342,30 +343,6 @@ namespace  planning
 					{
 							cout<<"Didn't do anything"<<*s<<endl;  
 					}			
-				}
-				/* Clears out all points that should be removed from the queue.
-				 * The points are removed because they are the successor of a point that
-				 * was just anazalzed and its priority has already been checked.
-				 * TODO priority map is what needs to be done to replace this   
-				 * functionality. 
-				 */
-				bool filterQueue()
-				{
-
-					shared_ptr< State<Z, R > > hold_state;
-					if(open_.empty())
-						return false;
-					while(!open_.empty()) 
-					{
-						Key<Z,R> hold(open_.top());
-						if(hold.getState()->in_queue_==false)
-							open_.pop();
-						else
-							break;	
-					}
-					if(open_.empty())
-						return false;
-					return true;	
 				}
 		public:
 				int ComputeorImprovePath()
@@ -421,7 +398,7 @@ namespace  planning
 					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 					int states = 0;
 					buildState(start);
-					while( filterQueue() && 
+					while( !open_.empty() && 
 							( Key<Z,R>(open_.top(),eps_)
 							  < Key<Z,R>(start,eps_)
 							  || start->g() != start->rhs()) )
