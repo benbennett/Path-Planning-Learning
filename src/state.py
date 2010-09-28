@@ -16,6 +16,7 @@ class State:
         self.rhs_value=None #One-step lookahead cost rhs(s)
         self.min_succ=None  #Min successor of the state
         self.successors = None #Set of all successors of the state 
+        self.cost_=1
     def __hash__(self):
         return self.point.__hash__()
     def get_min_succesor(self):
@@ -52,14 +53,17 @@ class State:
 
     def csprime_gsprime(self,sprime):
         """Computes  c(s,s') + g(s') """
-        return self.cost(sprime.point)+sprime.g()
-
+        return self.cost(sprime)+sprime.g()
+    def setCost(self,cost):
+        self.cost_ = cost
+    def getCost(self):
+        return self.cost_ 
     def cost(self,sprime):
         """
         Cost of moving in the grid.
         Future  have setable method 
         """
-        return 1
+        return sprime.getCost() 
 
     def g(self):
         """

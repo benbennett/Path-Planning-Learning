@@ -162,9 +162,9 @@ class AnytimeDstar:
         states = 0
         while len(self.OPEN)>0 and ( self.keys(self.OPEN.smallest())<self.keys(start) \
              or start.g()!= start.rhs()):
-
             #print self.keys(self.OPEN.smallest()) , "----",self.keys(self.s_start)
             hold_state = self.OPEN.smallest()
+            print hold_state
             #TODO debug methods 
             states+=1 
             self.OPEN.remove(hold_state)
@@ -183,7 +183,7 @@ class AnytimeDstar:
         return states 
 
     def ComputeorImprovePath(self):
-        self.__ImprovePath__(self.s_start)
+        print "Calls ", self.__ImprovePath__(self.s_start)
     def getPath(self):
         curP = aDstart.get_start()
         path = []
@@ -200,13 +200,13 @@ class AnytimeDstar:
         return path
     def addForbidden(self,point):
         if point in self.forbidden:
-            return 
+            return self.eps 
         self.forbidden.add(point)
         state = State(point)
         if self.G.has_key(state):
             state = self.G[state]
         else:
-            return
+            return self.eps
         toUpdate = []
         start_fix=None
         HOLD_OPEN=self.OPEN
@@ -214,8 +214,20 @@ class AnytimeDstar:
         HOLD_INCS=self.INCONS
         goal_temp = None
         Exper =True
-#we have broken the path ,
-        if self.path_.has_key(state) and True==Exper :
+        mr= self.eps
+        state.setCost(10000000.0)
+        state.set_g(10000000.0)
+        if self.path_.has_key(state):
+            mr = self.eps+10
+        for aS in state.successors:
+            self.__build_state__(aS)
+            aS.remove_successor(state)
+            toUpdate.append(aS)
+        for aS in toUpdate:
+            #aS.set_start(self.s_start)
+            self.UpdateState(aS)
+        return mr
+        """if self.path_.has_key(state) and True==Exper :
             start_fix = self.path_[state]
             goal_temp = start_fix.get_min_succesor().get_min_succesor()
             self.CLOSED = set()
@@ -240,10 +252,7 @@ class AnytimeDstar:
                 start_fix = self.path_[start_fix]
                 start_fix.set_start(self.s_start)
                 self.UpdateState(start_fix)
-        for aS in toUpdate:
-            aS.set_start(self.s_start)
-            self.UpdateState(aS)
-         
+        """
 
     def moveAllFromIncsToOpen(self):
         for aS in self.INCONS:
@@ -317,7 +326,7 @@ if __name__== "__main__":
     aDstart.UpdateAllPriorities()
     aDstart.CLOSED = set()
     aDstart.ComputeorImprovePath() 
-    print aDstart.getPath()
+    aDstart.getPath()
     start=(1,1)
     goal=(250,250)
     forbidden= set()
@@ -332,18 +341,26 @@ if __name__== "__main__":
     aDstart.ComputeorImprovePath() 
 
     def callForBidden(aDstart, tupe):
-        aDstart.addForbidden(tupe)
+        print "add forbidden",tupe
+        eps = aDstart.addForbidden(tupe)
+        eps_hold= aDstart.eps 
+        if eps>=aDstart.eps:
+            aDstart.eps= eps
         aDstart.moveAllFromIncsToOpen()
         aDstart.UpdateAllPriorities()
         aDstart.CLOSED = set()
         aDstart.ComputeorImprovePath() 
+        aDstart.eps = eps_hold
        # print aDstart.s_start.g()," , ", aDstart.s_start.rhs()
-        aDstart.getPath()
+        return aDstart.getPath()
+    print "Calling planner"
+    forbids = set()
     for i in range(5,200):
-        callForBidden(aDstart,(i,i))
+        aP = callForBidden(aDstart,(i,i))
+        #forbids.insert((i,i))
     for i in range(50,70):
-        callForBidden(aDstart,(i,i))
+        aP = callForBidden(aDstart,(i,i))
     for i in range(1,10):
-        callForBidden(aDstart,(50,50+i))
+        aP = callForBidden(aDstart,(50,50+i))
         callForBidden(aDstart,(50,50-i))
         print aDstart.s_start.g(),",  ", aDstart.s_start.rhs()
