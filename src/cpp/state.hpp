@@ -194,7 +194,7 @@ namespace  planning
 				  R cost_r =R( cost(sprime) + sprime.g() );
 					return  cost_r;
 				}
-				void set_cost(R cost_in)
+				void setCost(R cost_in)
 				{
 						cost_= cost_in;
 				}
