@@ -51,6 +51,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include "state.hpp"
 #include "key.hpp"
 #include "priority_dict.hpp"
+
 namespace  planning 
 {
 
@@ -70,12 +71,15 @@ namespace  planning
 				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
 				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
+        Logger log_stream;
+        std::ostream  log;
 		public:
 				list< shared_ptr < State < Z, R> > > path_;
 				bool never_built_;
 		public:
-				AnytimeDstar()
+				AnytimeDstar():log_stream(),log(log_stream.get_stream_buf())
 				{
+          
 					eps_=3.0;
 					never_built_=true;
 				}
@@ -174,7 +178,7 @@ namespace  planning
 						return;
 					forbidden_[point] = 0;
 					forbidden_[point] = 0; 
-					cout<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
+					log<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
 					if (!hasKey(point))
 					{
 						//do not have to do anything if point has not be visited. 
@@ -212,7 +216,7 @@ namespace  planning
 					toUpdate_iter = toUpdate.begin();
 					while (toUpdate_iter != toUpdate.end())
 					{
-						cout<<"update state:"<<**toUpdate_iter;
+						log<<"update state:"<<**toUpdate_iter;
 						UpdateState(*toUpdate_iter);
 						toUpdate_iter++;
 					}
@@ -329,19 +333,19 @@ namespace  planning
 							assert(s->getSuccessors().size()>0);
 							Key<Z,R> hold(s,eps_);
 							assert(hold.getState()->getSuccessors().size()>0);
-							cout<<"Putt in open: "<<hold<<endl;  
+							log<<"Putt in open: "<<hold<<endl;  
 							open_.push(hold);
 
 						}
 						else
 						{
-							cout<<"Putt in incos"<<*s<<endl;  
+							log<<"Putt in incos"<<*s<<endl;  
 							incons_[s->getPoint()] = s;
 						}
 					}
 					else
 					{
-							cout<<"Didn't do anything"<<*s<<endl;  
+							log<<"Didn't do anything"<<*s<<endl;  
 					}			
 				}
 		public:
@@ -350,7 +354,7 @@ namespace  planning
 						int mr;
 						if(never_built_)
 						{
-								cout<<"Start:"<<start_;
+								log<<"Start:"<<start_;
 								mr= ComputePath(start_);
 								never_built_=false;
 								int bp;
@@ -358,7 +362,7 @@ namespace  planning
 								 bp= buildPath();
 								if(bp>=0)
 								{
-										cout<<"First time planning successful."<<endl;
+										log<<"First time planning successful."<<endl;
 										return mr;
 								}
 
@@ -374,17 +378,17 @@ namespace  planning
 								 bp= buildPath();
 								if(bp>=0)
 								{
-										cout<<"First time planning successful."<<endl;
+										log<<"First time planning successful."<<endl;
 										return mr;
 								}
 								else
 								{
-										cout<<"Planning failed, trying to replan."<<endl;
+										log<<"Planning failed, trying to replan."<<endl;
 										
 								}
 
 						}
-						cout<<"Need to replan from scratch."<<endl;
+						log<<"Need to replan from scratch."<<endl;
 						return -1;
 				}
 		private:
@@ -405,7 +409,7 @@ namespace  planning
 					{
 						hold_key =  open_.top();
 						hold_state = hold_key.getState();	
-						cout<<"state:"<<*hold_state<<endl;
+						log<<"state:"<<*hold_state<<endl;
 						hold_state->in_queue_=false;
 						hold_state->setStart(start);
 						hold_state->visited_=true;
@@ -484,13 +488,13 @@ namespace  planning
 						{
 								typename list< boost::shared_ptr < State < Z, R> > >::iterator  path_iter;
 								path_iter=path_.begin();
-								cout<<"Cycle detected, will attempt to replan"<<endl;
+								log<<"Cycle detected, will attempt to replan"<<endl;
 								while(path_iter!=path_.end())
 								{
-										cout<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
+										log<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
 										path_iter++;
 								}
-								cout<<*hold<<endl;
+								log<<*hold<<endl;
 								throw 1;
 						}
 						path_map_[hold->getPoint()] =prev; 
