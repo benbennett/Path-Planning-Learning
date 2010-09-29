@@ -177,7 +177,6 @@ namespace  planning
 					if (forbidden_.find(point) != forbidden_.end())
 						return;
 					forbidden_[point] = 0;
-					forbidden_[point] = 0; 
 					log<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
 					if (!hasKey(point))
 					{
