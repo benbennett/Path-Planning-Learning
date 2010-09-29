@@ -207,7 +207,15 @@ namespace  planning
 						if(hold_update_state->getSuccessors().size()>0)
 						{
 							hold_update_state->removeSuccessor(state);
-							toUpdate.push_back(hold_update_state);
+							//it is a dead end
+              if(hold_update_state->getSuccessors().size()<2)
+							{
+								   forbidden_[hold_update_state->getPoint()] = 0;
+							}
+							else 
+							{
+									toUpdate.push_back(hold_update_state);
+							}
 						}	
 						succ_iter++;
 					}
@@ -252,7 +260,11 @@ namespace  planning
 								}
 							}
 						}
-						assert(in->getSuccessors().size()>0);
+						//means it is a dead end
+						if(in->getSuccessors().size()<2)
+						{
+							forbidden_[in->getPoint()]=0;
+						}
 					}
 				}
 				/* Changes the priorities of the keys in the queue . 
