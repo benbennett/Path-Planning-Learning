@@ -63,7 +63,6 @@ namespace  planning
 				//IE doesn't know how to istatinate a instance 
 				//Little confusing , dynamic 
 				//
-				std::map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
 				shared_ptr<  State<Z,R> >min_successor_;
 				R min_successor_value_;
 				shared_ptr< State<Z,R> >start_;
@@ -76,6 +75,8 @@ namespace  planning
 					gofs_ = INF; 
 
 				}
+		private:
+		std::map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
 			public:
 				State():successors_()
 				{
