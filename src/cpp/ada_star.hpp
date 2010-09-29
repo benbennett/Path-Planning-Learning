@@ -332,20 +332,14 @@ namespace  planning
 							assert(s->getSuccessors().size()>0);
 							Key<Z,R> hold(s,eps_);
 							assert(hold.getState()->getSuccessors().size()>0);
-							log<<"Putt in open: "<<hold<<endl;  
 							open_.push(hold);
 
 						}
 						else
 						{
-							log<<"Putt in incos"<<*s<<endl;  
 							incons_[s->getPoint()] = s;
 						}
 					}
-					else
-					{
-							log<<"Didn't do anything"<<*s<<endl;  
-					}			
 				}
 		public:
 				int ComputeorImprovePath()
