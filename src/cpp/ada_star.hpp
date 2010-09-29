@@ -92,7 +92,6 @@ namespace  planning
 					goal_= goal;	
 					goal_->setStart(start);
 					goal_->setRhs(0);
-					goal_->in_queue_=true;	
 					Key<Z,R> goal_key(goal_,eps_);
 					open_.push(goal_key);
 					never_built_=true;
