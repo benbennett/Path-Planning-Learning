@@ -378,17 +378,17 @@ namespace  planning
 								 bp= buildPath();
 								if(bp>=0)
 								{
-										log<<"First time planning successful."<<endl;
+										cout<<"First time planning successful."<<endl;
 										return mr;
 								}
 								else
 								{
-										log<<"Planning failed, trying to replan."<<endl;
+										cout<<"Planning failed, trying to replan."<<endl;
 										
 								}
 
 						}
-						log<<"Need to replan from scratch."<<endl;
+						cout<<"Need to replan from scratch."<<endl;
 						return -1;
 				}
 		private:
