@@ -1,4 +1,5 @@
 #include "stacktrace.hpp"
+#include <iostream>
 #include <execinfo.h> 
 #include<stdlib.h>
 #include<stdio.h>
@@ -34,7 +35,7 @@ namespace planning
         this->stream_buf_ = hold_buff; 
         this->isCout = false;
     #else
-    		this->stream_buff = cout.rdbuf(); 
+    		this->stream_buf_ = std::cout.rdbuf(); 
         this->isCout = true;
     #endif
     	
