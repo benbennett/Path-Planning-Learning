@@ -1,3 +1,9 @@
 .project
 .pydevproject
 PYSMELL*
+*.vpj
+*.vpw
+*.vpwhistu
+*.vtg
+**/*run.txt
+**/*log*.txt

@@ -3,3 +3,10 @@ CMakeFiles/*
 Makefile
 ada_star_bin
 cmake_install*
+Debug
+a.out 
+*.out
+*.vpj
+*.orig
+*run.txt*
+*log.txt*
