@@ -460,10 +460,15 @@ namespace  planning
 		public:
 				list< shared_ptr <  State < Z, R>  >  > getPath()
 				{
+						realBuildPath();
 						return path_;
 				}
 		private:
 				int buildPath()
+				{
+						return realBuildPath();
+				}
+				int realBuildPath()
 				{
 					path_.clear();
 					//typename State<Z,R>  hold; 
@@ -481,14 +486,14 @@ namespace  planning
 						{
 								typename list< boost::shared_ptr < State < Z, R> > >::iterator  path_iter;
 								path_iter=path_.begin();
-								log<<"Cycle detected, will attempt to replan"<<endl;
+								cerr<<"Cycle detected, will attempt to replan"<<endl;
 								while(path_iter!=path_.end())
 								{
-										log<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
+										cerr<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
 										path_iter++;
 								}
-								log<<*hold<<endl;
-								throw 1;
+								cerr<<*hold<<endl;
+								return -1;
 						}
 						path_map_[hold->getPoint()] =prev; 
 						path_.push_back(hold);
