@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 		iter_path++;
 	}
 	//final sanity checks
-	std::map< std::vector<int> , int > forbiddens = adstar.getForbidden();
+	boost::unordered_map< std::vector<int> , int > forbiddens = adstar.getForbidden();
 
 	iter_path = final_path.begin();
 	//should be a diagonal so we will check it.	

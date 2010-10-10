@@ -42,8 +42,10 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include <cmath>
 #include <queue>
 #include <functional>
-#include <boost/unordered_set.hpp>
-#include <map>
+#include <boost/unordered_map.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
@@ -51,9 +53,15 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include "state.hpp"
 #include "key.hpp"
 #include "priority_dict.hpp"
+namespace boost {
+    size_t hash_value(std::vector<long> const & t); 
+
+    size_t hash_value(std::vector<int> const & t); 
+}
 
 namespace  planning 
 {
+
 
 	using namespace std;
 	template<typename Z, typename R> 
@@ -64,12 +72,12 @@ namespace  planning
 				boost::shared_ptr < State < Z, R> > goal_; 
 
 
-				map< vector<Z>, shared_ptr< State<Z,R> > > path_map_;
-				map< vector<Z> , Z > forbidden_;
-				map< vector<Z> , shared_ptr< State<Z, R > > > states_;
+				boost::unordered_map< vector<Z>, shared_ptr< State<Z,R> > > path_map_;
+				boost::unordered_map< vector<Z> , Z > forbidden_;
+				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > states_;
 				priority_dict< vector<Z> , Key<Z,R>  > open_;
-				map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
-				map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
+				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
+				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
 				R eps_;
         Logger log_stream;
         std::ostream  log;
@@ -96,7 +104,7 @@ namespace  planning
 					open_.push(goal_key);
 					never_built_=true;
 				}
-				void setForbidden(map< vector<Z> , Z > forbidden)
+				void setForbidden(boost::unordered_map< vector<Z> , Z > forbidden)
 				{
 					forbidden_ = forbidden;
 
@@ -105,7 +113,7 @@ namespace  planning
 				{
 					eps_ = eps;
 				}   
-				map< vector<Z> , Z >getForbidden()
+				boost::unordered_map< vector<Z> , Z >getForbidden()
 				{
 					return forbidden_;
 				}   
@@ -185,8 +193,8 @@ namespace  planning
 					//have to go through and disconnect the succ going to the 
 					//current point that is forbidden.
 					shared_ptr< State<Z, R > > state = getState(point);
-					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
-					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
+					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
+					boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 
 					shared_ptr< State<Z, R > > hold_update_state;
 
@@ -303,7 +311,7 @@ namespace  planning
 				{
 
 
-					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  iter;	
+					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  iter;	
 					iter =incons_.begin();
 					while(iter!=incons_.end())
 					{
@@ -402,8 +410,8 @@ namespace  planning
 					shared_ptr< State<Z, R > > hold_state;
 					shared_ptr< State<Z, R > > hold_update_state;
 					//g++ wants the typename in front or it gets confused.	
-					typename map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
-					map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
+					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
+					boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
 					int states = 0;
 					buildState(start);
 					while( !open_.empty() && 
@@ -498,9 +506,11 @@ namespace  planning
 								typename list< boost::shared_ptr < State < Z, R> > >::iterator  path_iter;
 								path_iter=path_.begin();
 								cerr<<"Cycle detected, will attempt to replan"<<endl;
+								
 								while(path_iter!=path_.end())
 								{
-										cerr<<*(*path_iter)<<":"<<(*path_iter)->g()<<",";
+										cerr<<*(*path_iter)<<":"<<(*path_iter)->g()<< "addr: "<<(*path_iter).get()<< ",";
+
 										path_iter++;
 								}
 								cerr<<*hold<<endl;

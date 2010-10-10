@@ -7,7 +7,7 @@
 #include <queue>
 #include <functional>
 #include <boost/unordered_set.hpp>
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
@@ -18,7 +18,7 @@ namespace  planning
     {
     private:
         priority_queue< T , vector< T >,greater< T >  > queue_;
-        map< Z , T  >  dict_; 
+        boost::unordered_map< Z , T  >  dict_; 
     public:
       T top()
       {

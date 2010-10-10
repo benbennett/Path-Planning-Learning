@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <queue>
 #include <functional>
 #include <boost/unordered_set.hpp>
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>

@@ -36,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/unordered_set.hpp>
 #include <sstream>
 #include <string>
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
@@ -76,7 +76,7 @@ namespace  planning
 
 				}
 		private:
-		std::map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
+		boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
 			public:
 				State():successors_()
 				{
@@ -121,24 +121,17 @@ namespace  planning
 				{
 					goal_ = goal;
 				}
-				friend std::size_t  hash_value(State<Z,R> const in)
-				{
-					std::size_t seed=0;
-					boost::hash_combine(seed,in.point_[0]);
-					boost::hash_combine(seed,in.point_[1]);
-					return seed;
 
-				}
 			
 					
-				std::map< std::vector<Z> , shared_ptr< State<Z,R> > >  getSuccessors() const
+				boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > >  getSuccessors() const
 				{
 					return successors_;
 				}
 				boost::shared_ptr<	State <Z,R> > getMinSuccessor()
 				{
 					R min = -1;
-					typename std::map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
+					typename boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
 					State<Z,R> hold;
 					if(!(successors_.size()>0))
 					{
