@@ -36,24 +36,19 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 
 #ifndef ADA_STAR_HPP_
 #define ADA_STAR_HPP_
+
+#include "stacktrace.hpp"
+#include "state.hpp"
+#include "key.hpp"
+#include "priority_dict.hpp"
 #include <vector> 
 #include <iterator>
 #include <list>
 #include <functional>
 #include <boost/unordered_map.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
-#include "stacktrace.hpp"
-#include "state.hpp"
-#include "key.hpp"
-#include "priority_dict.hpp"
-namespace boost {
-    size_t hash_value(std::vector<long> const & t); 
-
-    size_t hash_value(std::vector<int> const & t); 
-}
 
 namespace  planning 
 {
@@ -62,32 +57,32 @@ namespace  planning
 		class AnytimeDstar
 		{
 			public:
-				boost::shared_ptr < State < Z, R> > start_; 
-				boost::shared_ptr < State < Z, R> > goal_; 
+				boost::shared_ptr < planning::State< Z, R> > start_; 
+				boost::shared_ptr < planning::State< Z, R> > goal_; 
 
 
-				boost::unordered_map< vector<Z>, shared_ptr< State<Z,R> > > path_map_;
-				boost::unordered_map< vector<Z> , Z > forbidden_;
-				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > states_;
-				priority_dict< vector<Z> , Key<Z,R>  > open_;
-				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > incons_;
-				boost::unordered_map< vector<Z> , shared_ptr< State<Z, R > > > closed_ ;
+				boost::unordered_map< tuple<Z>, boost::shared_ptr< planning::State<Z,R> >  > path_map_;
+				boost::unordered_map< tuple<Z> , Z > forbidden_;
+				boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >   > states_;
+				priority_dict< tuple<Z> , Key<Z,R>  > open_;
+				boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >  > incons_;
+				boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >  > closed_ ;
 				R eps_;
         Logger log_stream;
         std::ostream  log;
 		public:
-				list< shared_ptr < State < Z, R> > > path_;
+				list< boost::shared_ptr < planning::State< Z, R> > > path_;
 				bool never_built_;
 		public:
 				AnytimeDstar():log_stream(),log(log_stream.get_stream_buf())
 				{
-          
 					eps_=3.0;
 					never_built_=true;
 				}
 
-				void init(shared_ptr< State<Z, R > > start,shared_ptr< State<Z, R > > goal )
+				void init(boost::shared_ptr< planning::State<Z, R > > start ,boost::shared_ptr< planning::State<Z, R > > goal )
 				{
+
 					eps_=3.0;
 					start_  = start;
 					start_->setGoal(goal);
@@ -98,8 +93,14 @@ namespace  planning
 					open_.push(goal_key);
 					never_built_=true;
 				}
-				void setForbidden(boost::unordered_map< vector<Z> , Z > forbidden)
+				void setStart(  boost::shared_ptr< planning::State<Z, R > >  start)
 				{
+
+					start_ = start;
+				}
+				void setForbidden(boost::unordered_map< tuple<Z> , Z > forbidden)
+				{
+
 					forbidden_ = forbidden;
 
 				}
@@ -107,49 +108,46 @@ namespace  planning
 				{
 					eps_ = eps;
 				}   
-				boost::unordered_map< vector<Z> , Z >getForbidden()
+				boost::unordered_map< tuple<Z> , Z > getForbidden()
 				{
 					return forbidden_;
 				}   
-				void setStart( const shared_ptr< State<Z, R > >  start)
-				{
-					start_ = start;
-				}
 				void moveStart(Z first, Z second)
 				{
-				   shared_ptr< State<Z, R > >  hold_state = this->createState(first,second);
+				   boost::shared_ptr< planning::State<Z, R > >  hold_state = this->createState(first,second);
 				   this->buildState(hold_state);
 				   hold_state->setStart(hold_state);
 					 eps_=3.0;
 					 start_  = hold_state;
 					 start_->setGoal(goal_);
 				}
-				shared_ptr< State<Z, R > > getStart()
+				boost::shared_ptr< planning::State<Z, R > > getStart()
 				{
 					return start_;
 				}
-				bool hasKey(vector<Z> point)
+				bool hasKey(tuple<Z> point)
 				{
 					return  states_.find(point)!= states_.end(); 
 				}
-				shared_ptr< State<Z, R > > getState( vector<Z> point)
+				boost::shared_ptr< planning::State<Z, R > > getState( tuple<Z> point)
 				{
 					return  states_.at(point);
 				}
-				void addState( vector<Z> point, shared_ptr< State<Z, R > > state)
+				void addState( tuple<Z> point, boost::shared_ptr< planning::State<Z, R > > state)
 				{
+                   
 					states_[point] = state;
 				}       
-				shared_ptr< State<Z, R > > createState( Z first, Z second)
+				boost::shared_ptr< planning::State<Z, R > > createState( Z first, Z second)
 				{
 					Z  pt[] = {first,second};
-					vector<Z> point(pt,pt+2);
+					tuple<Z> point(pt,pt+2);
 					if ( hasKey(point))
 					{
 						return states_[point];
 					}
-					shared_ptr< State<Z, R > >  temp_ptr;
-					temp_ptr.reset(new State<Z,R> (point));
+					boost::shared_ptr< planning::State<Z, R > >  temp_ptr;
+					temp_ptr.reset(new planning::State<Z,R> (point));
 					if (goal_==NULL)
 						temp_ptr->setGoal(temp_ptr);
 					else
@@ -172,9 +170,9 @@ namespace  planning
 				 *  the priority queue. 
 				 *
 				 */
-				void addForbidden( vector<Z> point)
+				void addForbidden( tuple<Z> point)
 				{
-
+                    
 					if (forbidden_.find(point) != forbidden_.end())
 						return;
 					forbidden_[point] = 0;
@@ -186,16 +184,16 @@ namespace  planning
 					}
 					//have to go through and disconnect the succ going to the 
 					//current point that is forbidden.
-					shared_ptr< State<Z, R > > state = getState(point);
-					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
-					boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
+					boost::shared_ptr< planning::State<Z, R > > state = getState(point);
+					typename boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > > ::iterator  succ_iter;				
+					boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > >  hold_map;
 
-					shared_ptr< State<Z, R > > hold_update_state;
+					boost::shared_ptr< planning::State<Z, R > > hold_update_state;
 
 					hold_map =  state->getSuccessors();
 					succ_iter = hold_map.begin();   
-					vector< shared_ptr< State<Z, R > > > toUpdate;   
-					typename vector<  shared_ptr< State<Z, R > >  >::iterator toUpdate_iter; 
+					vector< boost::shared_ptr< planning::State<Z, R > > > toUpdate;   
+					typename vector<  boost::shared_ptr< planning::State<Z, R > >  >::iterator toUpdate_iter; 
 					while (succ_iter!= hold_map.end())
 					{
 						hold_update_state = succ_iter->second;
@@ -240,9 +238,10 @@ namespace  planning
 				 *
 				 *
 				 */
-				void  buildState( shared_ptr< State<Z, R > > & in)
+				void  buildState( boost::shared_ptr< planning::State<Z, R > > & newstate)
 				{
-					if(in->getSuccessors().size()==0)
+
+					if(newstate->getSuccessors().size()==0)
 					{
 						for( Z x = -1;x <2;x++)
 						{
@@ -252,23 +251,23 @@ namespace  planning
 								{
 									continue;
 								}
-								Z first = in->getPoint()[0]+ x;
-								Z second = in->getPoint()[1]+y;
+								Z first = newstate->getPoint()[0]+ x;
+								Z second = newstate->getPoint()[1]+y;
 
 								Z  pt[] = {first,second};
-								vector<Z> point(pt,pt+2);
+								tuple<Z> point(pt,pt+2);
 								//only add succ iff not in forbidden		
 								if (forbidden_.find( point) == forbidden_.end())
 								{
-									shared_ptr< State<Z, R > > hold =createState(first,second);
-									in->addSuccessor(hold);	
+									boost::shared_ptr< planning::State<Z, R > > hold =createState(first,second);
+									newstate->addSuccessor(hold);	
 								}
 							}
 						}
 						//means it is a dead end
-						if(in->getSuccessors().size()<2)
+						if(newstate->getSuccessors().size()<2)
 						{
-							forbidden_[in->getPoint()]=0;
+							forbidden_[newstate->getPoint()]=0;
 						}
 					}
 				}
@@ -283,7 +282,7 @@ namespace  planning
 				void UpdateAllPriorities()
 				{
 
-					priority_dict< vector<Z>, Key<Z,R>  > newqueue;
+					priority_dict< tuple<Z>, Key<Z,R>  > newqueue;
 					while(!open_.empty())
 					{
 						Key<Z,R> hold = open_.top();
@@ -309,7 +308,7 @@ namespace  planning
 				{
 
 
-					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  iter;	
+					typename boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > > ::iterator  iter;	
 					iter =incons_.begin();
 					while(iter!=incons_.end())
 					{
@@ -333,7 +332,7 @@ namespace  planning
 				 *	  else:
 				 *		 put in incons
 				 */
-				void UpdateState( shared_ptr< State<Z, R > >  s )
+				void UpdateState( boost::shared_ptr< planning::State<Z, R > >  s )
 				{
 
 					if( !(s->isGoal()))
@@ -402,14 +401,14 @@ namespace  planning
 						return -1;
 				}
 		private:
-				int ComputePath(shared_ptr < State < Z, R> >   start)
+				int ComputePath(boost::shared_ptr < planning::State< Z, R> >   start)
 				{
 					Key<Z,R> hold_key;
-					shared_ptr< State<Z, R > > hold_state;
-					shared_ptr< State<Z, R > > hold_update_state;
+					boost::shared_ptr< planning::State<Z, R > > hold_state;
+					boost::shared_ptr< planning::State<Z, R > > hold_update_state;
 					//g++ wants the typename in front or it gets confused.	
-					typename boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > > ::iterator  succ_iter;				
-					boost::unordered_map< vector<Z> , shared_ptr< State<Z,R> > >  hold_map;
+					typename boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > > ::iterator  succ_iter;				
+					boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > >  hold_map;
 					int states = 0;
 					buildState(start);
 					while( !open_.empty() && 
@@ -465,17 +464,17 @@ namespace  planning
 					}
 					return states;
 				}
-				inline std::vector<Z> get_key(Z x, Z y)
+				inline tuple<Z> get_key(Z x, Z y)
 				{
 					Z point[] = {x,y};
-					std::vector<Z> key(point,point+2);
+					tuple<Z> key(point,point+2);
 					return key;
 				}
 				/* Utility method to get a list of states from start to goal.
 				 * Not really need , but just a ease of use. 
 				 */	
 		public:
-				list< shared_ptr <  State < Z, R>  >  > getPath()
+				list< boost::shared_ptr <  planning::State< Z, R>  >  > getPath()
 				{
 						realBuildPath();
 						return path_;
@@ -488,9 +487,9 @@ namespace  planning
 				int realBuildPath()
 				{
 					path_.clear();
-					//typename State<Z,R>  hold; 
-					shared_ptr < State < Z, R> > hold;			
-					shared_ptr < State < Z, R> > prev;			
+					//typename planning::State<Z,R>  hold; 
+					boost::shared_ptr < planning::State< Z, R> > hold;			
+					boost::shared_ptr < planning::State< Z, R> > prev;			
 					hold = prev= start_;
 					path_map_.clear();
 
@@ -501,7 +500,7 @@ namespace  planning
 						hold = hold->getMinSuccessor();
 						if(path_map_.find(hold->getPoint())!=path_map_.end())
 						{
-								typename list< boost::shared_ptr < State < Z, R> > >::iterator  path_iter;
+								typename list< boost::shared_ptr < planning::State< Z, R> > >::iterator  path_iter;
 								path_iter=path_.begin();
 								cerr<<"Cycle detected, will attempt to replan"<<endl;
 								

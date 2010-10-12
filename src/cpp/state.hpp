@@ -33,7 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 #include <queue>
 #include <functional>
-#include <boost/unordered_set.hpp>
 #include <sstream>
 #include <string>
 #include <boost/unordered_map.hpp>
@@ -43,7 +42,79 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "stacktrace.hpp"
 namespace  planning 
 {
+	template <typename Z>
+	class tuple   
+	{
+	private:
+		std::vector<Z> val_; 
+	public: 
+		tuple(){}
+    tuple(Z  ar [], Z * ptr)
+		{
+				val_ = std::vector<Z>(ar,ptr);
+		}
+    bool operator==(tuple const& other) const
+    {
+				if(val_.size()!=other.val_.size())
+				{
+						return false;
+				}
+				for(int i = 0; i < val_.size(); i++)
+				{
+						if(val_[i]!=other.val_[i])
+						{
+								return false;
+						}
+				}
+        return true;
+    }
+    
+  friend std::size_t hash_value(tuple const& t)
+		{
+				if(t.val_.size()>=2)
+				{
+						return t.val_[0] *  1000000 + t.val_[1];
+				}
+				else
+				{
+						return 0;
+				}
+		}
+		Z operator [] (std::size_t n) const
+		{
+				return val_[n];
+		}
 
+		friend std::ostream& operator << (std::ostream& os, const tuple<Z>& in)
+		{
+			 
+			std::copy(in.val_.begin(),in.val_.end(),std::ostream_iterator <Z>(os,","));	
+			return os;
+		}
+        bool operator<(const tuple & rhs)const
+        {
+            if(val_.size()<rhs.val_.size()) 
+            {
+                return true;
+            }
+            else if(val_.size()>rhs.val_.size())
+            {
+                return false;
+            }
+            for(int i = 0; i < val_.size(); i++)
+            {
+                    if(val_[i]<rhs.val_[i])
+                    {
+                       return true;
+                    }
+            }
+
+        }
+        bool operator>(const tuple & rhs)const
+        {
+            
+        }
+	};
 	const double INF=10000000.0;
 	using namespace boost;
 	using namespace std;
@@ -51,11 +122,10 @@ namespace  planning
 		class State
 		{
 			public: 
-				typedef std::vector<Z> tuple;
 				bool in_queue_;
 			public:
 				bool visited_;
-				tuple point_;
+				tuple<Z> point_;
 				R rhs_value_;
 				R cost_;
 				R gofs_;
@@ -63,20 +133,20 @@ namespace  planning
 				//IE doesn't know how to istatinate a instance 
 				//Little confusing , dynamic 
 				//
-				shared_ptr<  State<Z,R> >min_successor_;
+				boost::shared_ptr<  State<Z,R> >min_successor_;
 				R min_successor_value_;
-				shared_ptr< State<Z,R> >start_;
-				shared_ptr< State<Z,R> >goal_;
+				boost::shared_ptr< State<Z,R> >start_;
+				boost::shared_ptr< State<Z,R> >goal_;
 				void clear()
 				{
 					Z pt[] = {0,0};
-					std::vector<Z> start_pt(pt,pt+2);
+					tuple<Z> start_pt(pt,pt+2);
 					rhs_value_=INF;
 					gofs_ = INF; 
 
 				}
 		private:
-		boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > > successors_;
+		    boost::unordered_map< tuple<Z> , boost::shared_ptr< State<Z,R> > > successors_;
 			public:
 				State():successors_()
 				{
@@ -85,7 +155,7 @@ namespace  planning
 					clear();
 					visited_=false;
 				}
-				State(tuple pos):successors_()
+				State(tuple<Z> pos):successors_()
 				{
 
 					in_queue_= false;
@@ -94,15 +164,16 @@ namespace  planning
 					this->point_= pos;
 					visited_=false;
 				}
-				State(boost::shared_ptr< State <Z,R> >  goal,tuple pos){
+				State(boost::shared_ptr< State <Z,R> >  goal,tuple<Z> pos){
 
 					in_queue_= false;
 					cost_=1;
+                   
 					clear();
 					goal_  = goal;
 					visited_=false;
 				}
-				State(tuple pos, boost::shared_ptr< State <Z,R> >  start,boost::shared_ptr< State <Z,R> >  goal):successors_()
+				State(tuple<Z> pos, boost::shared_ptr< State <Z,R> >  start,boost::shared_ptr< State <Z,R> >  goal):successors_()
 				{
 					in_queue_= false;
 					cost_=1;
@@ -124,14 +195,14 @@ namespace  planning
 
 			
 					
-				boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > >  getSuccessors() const
+				boost::unordered_map< tuple<Z> , boost::shared_ptr< State<Z,R> > >  getSuccessors() const
 				{
 					return successors_;
 				}
 				boost::shared_ptr<	State <Z,R> > getMinSuccessor()
 				{
 					R min = -1;
-					typename boost::unordered_map< std::vector<Z> , shared_ptr< State<Z,R> > >::iterator pos;
+					typename boost::unordered_map< tuple<Z> , boost::shared_ptr< State<Z,R> > >::iterator pos;
 					State<Z,R> hold;
 					if(!(successors_.size()>0))
 					{
@@ -162,12 +233,12 @@ namespace  planning
 					boost::shared_ptr< State<Z,R> > mr= getMinSuccessor();
 					return min_successor_value_;	
 				}
-				void removeSuccessor(shared_ptr< State<Z,R> > in)
+				void removeSuccessor(boost::shared_ptr< State<Z,R> > in)
 				{
 			assert(in!=NULL);
 			successors_.erase(in->getPoint());
 				}
-				void addSuccessor(shared_ptr< State<Z,R> > in)
+				void addSuccessor(boost::shared_ptr< State<Z,R> > in)
 				{
 					assert(in!=NULL);
 					successors_[in->getPoint()] = in;
@@ -222,7 +293,7 @@ namespace  planning
 					
 					return max2;
 				}
-				std::vector<Z> getPoint()
+				tuple<Z> getPoint()
 				{
 					return point_;
 				}
@@ -238,7 +309,7 @@ namespace  planning
 				friend std::ostream& operator << (std::ostream& os, const State<Z,R>& in)
 				{
 					os<<"(";
-					std::copy(in.point_.begin(),in.point_.end(),std::ostream_iterator <R>(os,","));	
+					os<<in.point_;
 					os<<")";
 					return os;
 				}
