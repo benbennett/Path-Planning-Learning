@@ -30,7 +30,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/functional/hash.hpp>
 namespace boost 
 {
-    size_t hash_value(std::vector<long> const & t) {
+/*   
+ size_t hash_value(std::vector<long> const & t) {
         std::cout<<"i was called too"<<std::endl;
         return t.at(0) *  1000000 + t.at(1) ;
     }
@@ -39,6 +40,7 @@ namespace boost
         std::cout<<"i was called"<<std::endl;
         return t.at(0) *  1000 + t.at(1) ;
     }
+    */
 }
 namespace planning{
 

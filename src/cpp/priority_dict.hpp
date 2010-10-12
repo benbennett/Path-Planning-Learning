@@ -18,7 +18,7 @@ namespace  planning
     {
     private:
         priority_queue< T , vector< T >,greater< T >  > queue_;
-        boost::unordered_map< Z , T  >  dict_; 
+        std::map< Z , T  >  dict_; 
     public:
       T top()
       {

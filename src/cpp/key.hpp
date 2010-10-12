@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <queue>
 #include <functional>
 #include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
@@ -45,7 +45,7 @@ namespace  planning
 		class Key 
 		{
 			public:
-				Key( shared_ptr < State < Z , R >  >  s,R  eps)
+				Key( boost::shared_ptr < State < Z , R >  >  s,R  eps)
 				{
 					state_ = s;
 					if( s->g()> s->rhs())
@@ -110,13 +110,13 @@ namespace  planning
 			public:
 				R k1;
 				R k2;
-				shared_ptr < State < Z , R >  > state_;
+				boost::shared_ptr < State < Z , R >  > state_;
 			public:
-				void setState( shared_ptr < State < Z , R >  > in)
+				void setState( boost::shared_ptr < State < Z , R >  > in)
 				{
 					state_ = in;
 				}
-				shared_ptr < State < Z , R >  >  getState()
+				boost::shared_ptr < State < Z , R >  >  getState()
 				{
 					return state_;
 				}
