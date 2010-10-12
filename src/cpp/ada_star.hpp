@@ -58,8 +58,6 @@ namespace boost {
 namespace  planning 
 {
 
-
-	using namespace std;
 	template<typename Z, typename R> 
 		class AnytimeDstar
 		{
