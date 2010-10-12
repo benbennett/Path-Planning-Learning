@@ -166,7 +166,9 @@ BOOST_AUTO_TEST_CASE(Aadasimpletest)
 BOOST_AUTO_TEST_CASE(DeadEndTest)
 {
 
-    cout<<"Dead End Test"<<endl;
+    cout<<"*********************Dead End Test *****************************"<<endl;
+    cout<<"*********************Dead End Test *****************************"<<endl;
+    cout<<"*********************Dead End Test *****************************"<<endl;
     using namespace planning;
     using namespace std;
 
@@ -198,7 +200,10 @@ BOOST_AUTO_TEST_CASE(DeadEndTest)
 
     adstar.addForbidden(createState(6,6));	
     mr = adstar.ComputeorImprovePath();
-
+    BOOST_CHECK(mr>=0);
+    cout<<"*********************Dead End Test *****************************"<<endl;
+    cout<<"*********************Dead End Test *****************************"<<endl;
+    cout<<"*********************Dead End Test *****************************"<<endl;
 }
 BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 {

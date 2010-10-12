@@ -209,9 +209,13 @@ namespace  planning
 						{
 							hold_update_state->removeSuccessor(state);
 							//it is a dead end
-              if(hold_update_state->getSuccessors().size()<2)
+						    if(hold_update_state->getSuccessors().size()<2)
 							{
+								   shared_ptr< State<Z,R> > delSucc = hold_update_state->getMinSuccessor();
+								   delSucc->removeSuccessor(hold_update_state);
+								   toUpdate.push_back(delSucc);
 								   forbidden_[hold_update_state->getPoint()] = 0;
+
 							}
 							else 
 							{
