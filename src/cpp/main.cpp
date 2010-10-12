@@ -163,6 +163,43 @@ BOOST_AUTO_TEST_CASE(Aadasimpletest)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(DeadEndTest)
+{
+
+    cout<<"Dead End Test"<<endl;
+    using namespace planning;
+    using namespace std;
+
+    AnytimeDstar<int,double> adstar;
+
+    shared_ptr< State<int, double> > start = adstar.createState(1,1);
+    shared_ptr< State<int, double> > goal = adstar.createState(10,10);
+
+    adstar.init(start,goal);
+    int mr =  adstar.ComputeorImprovePath();
+
+    std::cout<<mr<<std::endl;	
+    //not on path to test outside of path 	
+
+    adstar.addForbidden(createState(4,5));	
+    mr = adstar.ComputeorImprovePath();
+    adstar.addForbidden(createState(4,6));	
+    mr = adstar.ComputeorImprovePath();
+
+    adstar.addForbidden(createState(5,6));	
+    mr = adstar.ComputeorImprovePath();
+    adstar.addForbidden(createState(6,5));	
+    mr = adstar.ComputeorImprovePath();
+    adstar.addForbidden(createState(6,4));	
+    mr = adstar.ComputeorImprovePath();
+
+    adstar.addForbidden(createState(5,4));	
+    mr = adstar.ComputeorImprovePath();
+
+    adstar.addForbidden(createState(6,6));	
+    mr = adstar.ComputeorImprovePath();
+
+}
 BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 {
 	cout<<"adaAddForbiddenComplex"<<endl;
