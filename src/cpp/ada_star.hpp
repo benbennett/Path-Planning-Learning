@@ -39,13 +39,9 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include <vector> 
 #include <iterator>
 #include <list>
-#include <cmath>
-#include <queue>
 #include <functional>
 #include <boost/unordered_map.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
