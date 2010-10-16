@@ -87,8 +87,10 @@ namespace  planning
 
 		friend std::ostream& operator << (std::ostream& os, const tuple<Z>& in)
 		{
-			 
-			std::copy(in.val_.begin(),in.val_.end(),std::ostream_iterator <Z>(os,","));	
+			if(in.val_.size()>0)
+			{
+				os<<in.val_[0] << ","<<in.val_[1];
+			}
 			return os;
 		}
         bool operator<(const tuple & rhs)const
