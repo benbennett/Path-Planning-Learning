@@ -114,12 +114,14 @@ namespace  planning
 				}   
 				void moveStart(Z first, Z second)
 				{
-				   boost::shared_ptr< planning::State<Z, R > >  hold_state = this->createState(first,second);
-				   this->buildState(hold_state);
-				   hold_state->setStart(hold_state);
+				     boost::shared_ptr< planning::State<Z, R > >  hold_state = this->createState(first,second);
+				     this->buildState(hold_state);
+				     hold_state->setStart(hold_state);
 					 eps_=3.0;
 					 start_  = hold_state;
 					 start_->setGoal(goal_);
+					 Key<Z,R> goal_key(goal_,eps_);
+					 open_.push(goal_key);
 				}
 				boost::shared_ptr< planning::State<Z, R > > getStart()
 				{
