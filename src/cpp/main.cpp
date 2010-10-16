@@ -103,6 +103,15 @@ inline planning::tuple<int> createState(int x, int y)
 	return st1;
 
 }
+
+inline planning::tuple<long> createStateL(long x, long y)
+{
+
+	long point[] = { x,y}; 
+	planning::tuple<long> st1(point,point+2);
+	return st1;
+
+}
 BOOST_AUTO_TEST_CASE(StateTestCase)
 {
 
@@ -205,6 +214,113 @@ BOOST_AUTO_TEST_CASE(DeadEndTest)
     cout<<"*********************Dead End Test *****************************"<<endl;
     cout<<"*********************Dead End Test *****************************"<<endl;
 }
+
+BOOST_AUTO_TEST_CASE(cycletest1)
+{
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+	using namespace planning;
+	using namespace std;
+
+	AnytimeDstar<long,double> adstar;
+	
+	boost::shared_ptr< State<long, double> > start = adstar.createState(28606,28605);
+	boost::shared_ptr< State<long, double> > goal = adstar.createState(28626,28626);
+
+	adstar.init(start,goal);
+	boost::unordered_map< planning::tuple<long>,long> forbids;
+	
+	forbids[createStateL(28615,28600)]=1;
+	forbids[createStateL(28614,28599)]=1;
+	forbids[createStateL(28616,28607)]=1;
+	forbids[createStateL(28618,28615)]=1;
+	forbids[createStateL(28614,28600)]=1;
+	forbids[createStateL(28613,28599)]=1;
+	forbids[createStateL(28615,28607)]=1;
+	forbids[createStateL(28617,28615)]=1;
+	forbids[createStateL(28613,28600)]=1;
+	forbids[createStateL(28614,28607)]=1;
+	forbids[createStateL(28616,28615)]=1;
+	forbids[createStateL(28612,28600)]=1;
+	forbids[createStateL(28613,28607)]=1;
+	forbids[createStateL(28611,28600)]=1;
+	forbids[createStateL(28624,28599)]=1;
+	forbids[createStateL(28613,28608)]=1;
+	forbids[createStateL(28624,28600)]=1;
+	forbids[createStateL(28613,28609)]=1;
+	forbids[createStateL(28624,28601)]=1;
+	forbids[createStateL(28625,28605)]=1;
+	forbids[createStateL(28613,28610)]=1;
+	forbids[createStateL(28610,28599)]=1;
+	forbids[createStateL(28624,28602)]=1;
+	forbids[createStateL(28610,28600)]=1;
+	forbids[createStateL(28623,28599)]=1;
+	forbids[createStateL(28624,28603)]=1;
+	forbids[createStateL(28624,28604)]=1;
+	forbids[createStateL(28624,28605)]=1;
+	forbids[createStateL(28609,28599)]=1;
+	forbids[createStateL(28609,28600)]=1;
+	forbids[createStateL(28622,28599)]=1;
+	forbids[createStateL(28621,28599)]=1;
+	forbids[createStateL(28620,28599)]=1;
+	forbids[createStateL(28619,28599)]=1;
+	forbids[createStateL(28618,28599)]=1;
+	forbids[createStateL(28617,28599)]=1;
+	forbids[createStateL(28619,28607)]=1;
+	forbids[createStateL(28631,28605)]=1;
+	forbids[createStateL(28616,28599)]=1;
+	forbids[createStateL(28631,28606)]=1;
+	forbids[createStateL(28618,28607)]=1;
+	forbids[createStateL(28631,28607)]=1;
+	forbids[createStateL(28631,28608)]=1;
+	forbids[createStateL(28631,28609)]=1;
+	forbids[createStateL(28615,28599)]=1;
+	forbids[createStateL(28619,28615)]=1;
+	adstar.setForbidden(forbids);
+	int mr =  adstar.ComputeorImprovePath();
+
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+    cout<<"*********************Cycle Test 1 Test *****************************"<<endl;
+	std::cout<<mr<<std::endl;	
+	BOOST_CHECK(mr>=0);
+}
+BOOST_AUTO_TEST_CASE(getForbiddens)
+{
+	cout<<"check get forbiddens"<<endl;
+	using namespace planning;
+	using namespace std;
+
+	AnytimeDstar<int,double> adstar;
+	
+	boost::shared_ptr< State<int, double> > start = adstar.createState(1,1);
+	boost::shared_ptr< State<int, double> > goal = adstar.createState(100,100);
+
+	adstar.init(start,goal);
+	int mr =  adstar.ComputeorImprovePath();
+
+	std::cout<<mr<<std::endl;	
+	BOOST_CHECK(mr==100);
+	//not on path to test outside of path 	
+
+	for(int j=2;j<50;j++)
+	{
+		//add a bunch
+		adstar.addForbidden(createState(j,j));	
+		mr = adstar.ComputeorImprovePath();
+		std::cout<<mr<<std::endl;	
+	}
+	boost::unordered_map< planning::tuple<int>,int> forbids = adstar.getForbidden();
+	boost::unordered_map< planning::tuple<int>,int>::iterator my_iter =forbids.begin();
+	while(my_iter!=forbids.end()){
+		cout<<my_iter->first<<endl;
+		my_iter++;
+	}
+}
+
 BOOST_AUTO_TEST_CASE(adaAddForbiddenComplex)
 {
 	cout<<"adaAddForbiddenComplex"<<endl;
