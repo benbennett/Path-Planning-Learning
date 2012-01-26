@@ -74,10 +74,12 @@ public:
     list< boost::shared_ptr < planning::State< Z, R> > > path_;
     bool never_built_;
 public:
-    AnytimeDstar():log_stream(),log(log_stream.get_stream_buf())
+    AnytimeDstar():
+        log_stream(),
+        log(log_stream.get_stream_buf()),
+        eps_(3.0),
+        never_built_(true)
     {
-        eps_=3.0;
-        never_built_=true;
     }
 
     void init(boost::shared_ptr< planning::State<Z, R > > start ,boost::shared_ptr< planning::State<Z, R > > goal )
@@ -100,9 +102,7 @@ public:
     }
     void setForbidden(boost::unordered_map< tuple<Z> , Z > forbidden)
     {
-
         forbidden_ = forbidden;
-
     }
     void setEps(R eps)
     {
@@ -120,14 +120,13 @@ public:
         eps_=3.0;
         start_  = hold_state;
         start_->setGoal(goal_);
-        Key<Z,R> goal_key(goal_,eps_);
-        open_.push(goal_key);
+        open_.push(Key<Z,R>(goal_,eps_));
     }
     boost::shared_ptr< planning::State<Z, R > > getStart()
     {
         return start_;
     }
-    bool hasKey(tuple<Z> point)
+    bool hasKey(tuple<Z> point) const
     {
         return  states_.find(point)!= states_.end();
     }
@@ -145,23 +144,20 @@ public:
         Z  pt[] = {first,second};
         tuple<Z> point(pt,pt+2);
         if ( hasKey(point))
-        {
             return states_[point];
-        }
+
         boost::shared_ptr< planning::State<Z, R > >  temp_ptr;
         temp_ptr.reset(new planning::State<Z,R> (point));
+
         if (goal_==NULL)
             temp_ptr->setGoal(temp_ptr);
         else
-        {
             temp_ptr->setGoal(goal_);
-        }
+
         if(start_==NULL)
             temp_ptr->setStart(temp_ptr);
         else
-        {
             temp_ptr->setStart(start_);
-        }
         states_[point] = temp_ptr;
         return temp_ptr;
     }
@@ -179,11 +175,9 @@ public:
             return;
         forbidden_[point] = 0;
         log<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
+        //do not have to do anything if point has not be visited.
         if (!hasKey(point))
-        {
-            //do not have to do anything if point has not be visited.
             return;
-        }
         //have to go through and disconnect the succ going to the
         //current point that is forbidden.
         boost::shared_ptr< planning::State<Z, R > > state = getState(point);
@@ -201,9 +195,7 @@ public:
             hold_update_state = succ_iter->second;
 
             if (closed_.find(succ_iter->first)!= closed_.end())
-            {
                 closed_.erase(succ_iter->first);
-            }
             hold_update_state = succ_iter->second;
             if(hold_update_state->getSuccessors().size()>0)
             {
@@ -218,9 +210,7 @@ public:
 
                 }
                 else
-                {
                     toUpdate.push_back(hold_update_state);
-                }
             }
             succ_iter++;
         }
@@ -235,10 +225,6 @@ public:
 
     }
     /* Build up state for the first time , if it has not been explored before.
-     * Find out if
-     *
-     *
-     *
      */
     void  buildState( boost::shared_ptr< planning::State<Z, R > > & newstate)
     {
@@ -250,9 +236,7 @@ public:
                 for( Z y = -1; y < 2; y++)
                 {
                     if(y==0 && x==0)
-                    {
                         continue;
-                    }
                     Z first = newstate->getPoint()[0]+ x;
                     Z second = newstate->getPoint()[1]+y;
 
@@ -260,24 +244,16 @@ public:
                     tuple<Z> point(pt,pt+2);
                     //only add succ iff not in forbidden
                     if (forbidden_.find( point) == forbidden_.end())
-                    {
-                        boost::shared_ptr< planning::State<Z, R > > hold =createState(first,second);
-                        newstate->addSuccessor(hold);
-                    }
+                        newstate->addSuccessor(createState(first,second));
                 }
             }
             //means it is a dead end
             if(newstate->getSuccessors().size()<2)
-            {
                 forbidden_[newstate->getPoint()]=0;
-            }
         }
     }
     /* Changes the priorities of the keys in the queue .
      * Should be called after graph change or when the inflation factor changed.
-     *
-     *
-     *
      *
      */
 private:
@@ -293,9 +269,8 @@ private:
                 &&
                 hold.getState()->getSuccessors().size()>0
             )
-            {
                 newqueue.push( Key<Z,R>(hold.getState(),eps_));
-            }
+
             open_.pop();
         }
 
@@ -339,10 +314,10 @@ private:
 
         if( !(s->isGoal()))
             s->setRhs(s->getMinSuccessorValue());
+
         if(open_.contains(s->getPoint()))
-        {
             open_.remove(s->getPoint());
-        }
+
         if(s->g() != s->rhs())
         {
             if(closed_.find(s->getPoint())== closed_.end())
@@ -354,9 +329,7 @@ private:
 
             }
             else
-            {
                 incons_[s->getPoint()] = s;
-            }
         }
     }
 public:
@@ -371,6 +344,7 @@ public:
             int bp;
             if(mr>=0)
                 bp= buildPath();
+
             if(bp>=0)
             {
                 log<<"First time planning successful."<<endl;
@@ -393,10 +367,8 @@ public:
                 return mr;
             }
             else
-            {
                 cout<<"Planning failed, trying to replan."<<endl;
 
-            }
 
         }
         cout<<"Need to replan from scratch."<<endl;
