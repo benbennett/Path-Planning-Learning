@@ -26,12 +26,14 @@ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 /*
+
    Simple implementation of
    "Anytime Dynamic A*: An Anytime, Replanning Algorithm" by
    Maxim Likhachev , Dave Ferguson , Geoff Gordon , Anthony Stentz , and Sebastian Thrun
    Warning this may be incorrect, mainly put together to learn from there paper.
    See paper at:
 http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005_1.pdf
+
 */
 
 #ifndef ADA_STAR_HPP_
@@ -40,6 +42,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include "stacktrace.hpp"
 #include "state.hpp"
 #include "key.hpp"
+#include "planner.hpp"
 #include "priority_dict.hpp"
 #include <vector>
 #include <iterator>
@@ -49,235 +52,34 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <iostream>
-
 namespace  planning
 {
 
 template<typename Z, typename R>
-class AnytimeDstar
+class AnytimeDstar : public Planner<Z,R>
 {
-public:
-    boost::shared_ptr < planning::State< Z, R> > start_;
-    boost::shared_ptr < planning::State< Z, R> > goal_;
-
-
-    boost::unordered_map< tuple<Z>, boost::shared_ptr< planning::State<Z,R> >  > path_map_;
-    boost::unordered_map< tuple<Z> , Z > forbidden_;
-    boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >   > states_;
-    priority_dict< tuple<Z> , Key<Z,R>  > open_;
-    boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >  > incons_;
-    boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z, R > >  > closed_ ;
-    R eps_;
-    Logger log_stream;
-    std::ostream  log;
-public:
-    list< boost::shared_ptr < planning::State< Z, R> > > path_;
-    bool never_built_;
-public:
-    AnytimeDstar():
-        log_stream(),
-        log(log_stream.get_stream_buf()),
-        eps_(3.0),
-        never_built_(true)
-    {
-    }
-
-    void init(boost::shared_ptr< planning::State<Z, R > > start ,boost::shared_ptr< planning::State<Z, R > > goal )
-    {
-
-        eps_=3.0;
-        start_  = start;
-        start_->setGoal(goal);
-        goal_= goal;
-        goal_->setStart(start);
-        goal_->setRhs(0);
-        Key<Z,R> goal_key(goal_,eps_);
-        open_.push(goal_key);
-        never_built_=true;
-    }
-    void setStart(  boost::shared_ptr< planning::State<Z, R > >  start)
-    {
-
-        start_ = start;
-    }
-    void setForbidden(boost::unordered_map< tuple<Z> , Z > forbidden)
-    {
-        forbidden_ = forbidden;
-    }
-    void setEps(R eps)
-    {
-        eps_ = eps;
-    }
-    boost::unordered_map< tuple<Z> , Z > getForbidden()
-    {
-        return forbidden_;
-    }
-    void moveStart(Z first, Z second)
-    {
-        boost::shared_ptr< planning::State<Z, R > >  hold_state = this->createState(first,second);
-        this->buildState(hold_state);
-        hold_state->setStart(hold_state);
-        eps_=3.0;
-        start_  = hold_state;
-        start_->setGoal(goal_);
-        open_.push(Key<Z,R>(goal_,eps_));
-    }
-    boost::shared_ptr< planning::State<Z, R > > getStart()
-    {
-        return start_;
-    }
-    bool hasKey(tuple<Z> point) const
-    {
-        return  states_.find(point)!= states_.end();
-    }
-    boost::shared_ptr< planning::State<Z, R > > getState( tuple<Z> point)
-    {
-        return  states_.at(point);
-    }
-    void addState( tuple<Z> point, boost::shared_ptr< planning::State<Z, R > > state)
-    {
-
-        states_[point] = state;
-    }
-    boost::shared_ptr< planning::State<Z, R > > createState( Z first, Z second)
-    {
-        Z  pt[] = {first,second};
-        tuple<Z> point(pt,pt+2);
-        if ( hasKey(point))
-            return states_[point];
-
-        boost::shared_ptr< planning::State<Z, R > >  temp_ptr;
-        temp_ptr.reset(new planning::State<Z,R> (point));
-
-        if (goal_==NULL)
-            temp_ptr->setGoal(temp_ptr);
-        else
-            temp_ptr->setGoal(goal_);
-
-        if(start_==NULL)
-            temp_ptr->setStart(temp_ptr);
-        else
-            temp_ptr->setStart(start_);
-        states_[point] = temp_ptr;
-        return temp_ptr;
-    }
-    /*  Add forbidden.
-     *  Check if it is has been visited at all, take note , return
-     *  Else  go through and remove all states that connect to the new forbidden
-     *  state, remove the conntected point and updated the connected states in
-     *  the priority queue.
-     *
-     */
-    void addForbidden( tuple<Z> point)
-    {
-
-        if (forbidden_.find(point) != forbidden_.end())
-            return;
-        forbidden_[point] = 0;
-        log<<"fb:( "<<point[0]<<","<<point[1]<<")"<<endl;
-        //do not have to do anything if point has not be visited.
-        if (!hasKey(point))
-            return;
-        //have to go through and disconnect the succ going to the
-        //current point that is forbidden.
-        boost::shared_ptr< planning::State<Z, R > > state = getState(point);
-        typename boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > > ::iterator  succ_iter;
-        boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > >  hold_map;
-
-        boost::shared_ptr< planning::State<Z, R > > hold_update_state;
-
-        hold_map =  state->getSuccessors();
-        succ_iter = hold_map.begin();
-        vector< boost::shared_ptr< planning::State<Z, R > > > toUpdate;
-        typename vector<  boost::shared_ptr< planning::State<Z, R > >  >::iterator toUpdate_iter;
-        while (succ_iter!= hold_map.end())
-        {
-            hold_update_state = succ_iter->second;
-
-            if (closed_.find(succ_iter->first)!= closed_.end())
-                closed_.erase(succ_iter->first);
-            hold_update_state = succ_iter->second;
-            if(hold_update_state->getSuccessors().size()>0)
-            {
-                hold_update_state->removeSuccessor(state);
-                //it is a dead end
-                if(hold_update_state->getSuccessors().size()<2)
-                {
-                    shared_ptr< State<Z,R> > delSucc = hold_update_state->getMinSuccessor();
-                    delSucc->removeSuccessor(hold_update_state);
-                    toUpdate.push_back(delSucc);
-                    forbidden_[hold_update_state->getPoint()] = 0;
-
-                }
-                else
-                    toUpdate.push_back(hold_update_state);
-            }
-            succ_iter++;
-        }
-
-        toUpdate_iter = toUpdate.begin();
-        while (toUpdate_iter != toUpdate.end())
-        {
-            log<<"update state:"<<**toUpdate_iter;
-            UpdateState(*toUpdate_iter);
-            toUpdate_iter++;
-        }
-
-    }
-    /* Build up state for the first time , if it has not been explored before.
-     */
-    void  buildState( boost::shared_ptr< planning::State<Z, R > > & newstate)
-    {
-
-        if(newstate->getSuccessors().size()==0)
-        {
-            for( Z x = -1; x <2; x++)
-            {
-                for( Z y = -1; y < 2; y++)
-                {
-                    if(y==0 && x==0)
-                        continue;
-                    Z first = newstate->getPoint()[0]+ x;
-                    Z second = newstate->getPoint()[1]+y;
-
-                    Z  pt[] = {first,second};
-                    tuple<Z> point(pt,pt+2);
-                    //only add succ iff not in forbidden
-                    if (forbidden_.find( point) == forbidden_.end())
-                        newstate->addSuccessor(createState(first,second));
-                }
-            }
-            //means it is a dead end
-            if(newstate->getSuccessors().size()<2)
-                forbidden_[newstate->getPoint()]=0;
-        }
-    }
-    /* Changes the priorities of the keys in the queue .
-     * Should be called after graph change or when the inflation factor changed.
-     *
-     */
-private:
+protected:
     void UpdateAllPriorities()
     {
 
         priority_dict< tuple<Z>, Key<Z,R>  > newqueue;
-        while(!open_.empty())
+        while(!this->open_.empty())
         {
-            Key<Z,R> hold = open_.top();
+            Key<Z,R> hold = this->open_.top();
             if (
-                forbidden_.find(hold.getState()->getPoint()) == forbidden_.end()
+                this->forbidden_.find(hold.getState()->getPoint()) == this->forbidden_.end()
                 &&
                 hold.getState()->getSuccessors().size()>0
             )
-                newqueue.push( Key<Z,R>(hold.getState(),eps_));
+                newqueue.push( Key<Z,R>(hold.getState(),this->eps_));
 
-            open_.pop();
+            this->open_.pop();
         }
 
         while(!newqueue.empty())
         {
             Key<Z,R> hold = newqueue.top();
-            open_.push( Key<Z,R>(hold.getState(),eps_));
+            this->open_.push( Key<Z,R>(hold.getState(),this->eps_));
             newqueue.pop();
         }
     }
@@ -286,19 +88,14 @@ private:
 
 
         typename boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > > ::iterator  iter;
-        iter =incons_.begin();
-        while(iter!=incons_.end())
+        iter =this->incons_.begin();
+        while(iter!=this->incons_.end())
         {
-            open_.push(Key<Z,R>(iter->second,eps_));
+            this->open_.push(Key<Z,R>(iter->second,this->eps_));
             iter++;
         }
-        incons_.clear();
+        this->incons_.clear();
 
-    }
-    void ClearClosed()
-    {
-
-        this->closed_.clear();
     }
     /* Update the state
      * if s not goal
@@ -309,45 +106,45 @@ private:
      *	  else:
      *		 put in incons
      */
-    void UpdateState( boost::shared_ptr< planning::State<Z, R > >  s )
+    virtual void UpdateState( boost::shared_ptr< planning::State<Z, R > >  s )
     {
 
         if( !(s->isGoal()))
             s->setRhs(s->getMinSuccessorValue());
 
-        if(open_.contains(s->getPoint()))
-            open_.remove(s->getPoint());
+        if(this->open_.contains(s->getPoint()))
+            this->open_.remove(s->getPoint());
 
         if(s->g() != s->rhs())
         {
-            if(closed_.find(s->getPoint())== closed_.end())
+            if(this->closed_.find(s->getPoint())== this->closed_.end())
             {
                 assert(s->getSuccessors().size()>0);
-                Key<Z,R> hold(s,eps_);
+                Key<Z,R> hold(s,this->eps_);
                 assert(hold.getState()->getSuccessors().size()>0);
-                open_.push(hold);
+                this->open_.push(hold);
 
             }
             else
-                incons_[s->getPoint()] = s;
+                this->incons_[s->getPoint()] = s;
         }
     }
 public:
     int ComputeorImprovePath()
     {
         int mr;
-        if(never_built_)
+        if(this->never_built_)
         {
-            log<<"Start:"<<start_;
-            mr= ComputePath(start_);
-            never_built_=false;
+            this->log<<"Start:"<<this->start_;
+            mr= ComputePath(this->start_);
+            this->never_built_=false;
             int bp;
             if(mr>=0)
-                bp= buildPath();
+                bp= this->buildPath();
 
             if(bp>=0)
             {
-                log<<"First time planning successful."<<endl;
+                this->log<<"First time planning successful."<<endl;
                 return mr;
             }
 
@@ -356,11 +153,11 @@ public:
         {
             MoveAllFromIncsToOpen();
             UpdateAllPriorities();
-            ClearClosed();
-            mr= ComputePath(start_);
+            this->ClearClosed();
+            mr= ComputePath(this->start_);
             int bp;
             if(mr>=0)
-                bp= buildPath();
+                bp= this->buildPath();
             if(bp>=0)
             {
                 cout<<"First time planning successful."<<endl;
@@ -374,7 +171,7 @@ public:
         cout<<"Need to replan from scratch."<<endl;
         return -1;
     }
-private:
+protected:
     int ComputePath(boost::shared_ptr < planning::State< Z, R> >   start)
     {
         Key<Z,R> hold_key;
@@ -385,23 +182,23 @@ private:
         boost::unordered_map< tuple<Z> , boost::shared_ptr< planning::State<Z,R> > >  hold_map;
         int states = 0;
         buildState(start);
-        while( !open_.empty() &&
-                ( Key<Z,R>(open_.top(),eps_)
-                  < Key<Z,R>(start,eps_)
+        while( !this->open_.empty() &&
+                ( Key<Z,R>(this->open_.top(),this->eps_)
+                  < Key<Z,R>(start,this->eps_)
                   || start->g() != start->rhs()) )
         {
-            hold_key =  open_.top();
+            hold_key =  this->open_.top();
             hold_state = hold_key.getState();
-            log<<"state:"<<*hold_state<<endl;
+            this->log<<"state:"<<*hold_state<<endl;
             hold_state->in_queue_=false;
             hold_state->setStart(start);
             hold_state->visited_=true;
-            open_.pop();
+            this->open_.pop();
             states++;
             if( hold_state->g() > hold_state->rhs())
             {
                 hold_state->setG(hold_state->rhs());
-                closed_[hold_state->getPoint()]= hold_state;
+                this->closed_[hold_state->getPoint()]= hold_state;
                 buildState(hold_state);
                 assert(hold_state->getSuccessors().size()>0);
                 hold_map = hold_state->getSuccessors();
@@ -437,63 +234,6 @@ private:
 
         }
         return states;
-    }
-    inline tuple<Z> get_key(Z x, Z y)
-    {
-        Z point[] = {x,y};
-        tuple<Z> key(point,point+2);
-        return key;
-    }
-    /* Utility method to get a list of states from start to goal.
-     * Not really need , but just a ease of use.
-     */
-public:
-    list< boost::shared_ptr <  planning::State< Z, R>  >  > getPath()
-    {
-        realBuildPath();
-        return path_;
-    }
-private:
-    int buildPath()
-    {
-        return realBuildPath();
-    }
-    int realBuildPath()
-    {
-        path_.clear();
-        //typename planning::State<Z,R>  hold;
-        boost::shared_ptr < planning::State< Z, R> > hold;
-        boost::shared_ptr < planning::State< Z, R> > prev;
-        hold = prev= start_;
-        path_map_.clear();
-
-        do
-        {
-            //you shouldn't need the beginning
-            //because that is where you are starting.
-            hold = hold->getMinSuccessor();
-            if(path_map_.find(hold->getPoint())!=path_map_.end())
-            {
-                typename list< boost::shared_ptr < planning::State< Z, R> > >::iterator  path_iter;
-                path_iter=path_.begin();
-                cerr<<"Cycle detected, will attempt to replan"<<endl;
-
-                while(path_iter!=path_.end())
-                {
-                    cerr<<*(*path_iter)<<":"<<(*path_iter)->g()<< "addr: "<<(*path_iter).get()<< ",";
-
-                    path_iter++;
-                }
-                cerr<<*hold<<endl;
-                return -1;
-            }
-            path_map_[hold->getPoint()] =prev;
-            path_.push_back(hold);
-            prev = hold;
-
-        }
-        while(hold!=goal_);
-        return 1;
     }
 };
 }
