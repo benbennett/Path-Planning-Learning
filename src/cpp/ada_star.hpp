@@ -46,6 +46,49 @@ namespace  planning
 template<typename Z, typename R>
 class AnytimeDstar : public Planner<Z,R>
 {
+
+public:
+    int ComputeorImprovePath()
+    {
+        int mr;
+        if(this->never_built_)
+        {
+            this->log<<"Start:"<<this->start_;
+            mr= ComputePath(this->start_);
+            this->never_built_=false;
+            int bp;
+            if(mr>=0)
+                bp= this->buildPath();
+
+            if(bp>=0)
+            {
+                this->log<<"First time planning successful."<<endl;
+                return mr;
+            }
+
+        }
+        for(int i=0; i<5; i++)
+        {
+            MoveAllFromIncsToOpen();
+            UpdateAllPriorities();
+            this->ClearClosed();
+            mr= ComputePath(this->start_);
+            int bp;
+            if(mr>=0)
+                bp= this->buildPath();
+            if(bp>=0)
+            {
+                cout<<"First time planning successful."<<endl;
+                return mr;
+            }
+            else
+                cout<<"Planning failed, trying to replan."<<endl;
+
+
+        }
+        cout<<"Need to replan from scratch."<<endl;
+        return -1;
+    }
 protected:
     void UpdateAllPriorities()
     {
@@ -116,48 +159,6 @@ protected:
             else
                 this->incons_[s->getPoint()] = s;
         }
-    }
-public:
-    int ComputeorImprovePath()
-    {
-        int mr;
-        if(this->never_built_)
-        {
-            this->log<<"Start:"<<this->start_;
-            mr= ComputePath(this->start_);
-            this->never_built_=false;
-            int bp;
-            if(mr>=0)
-                bp= this->buildPath();
-
-            if(bp>=0)
-            {
-                this->log<<"First time planning successful."<<endl;
-                return mr;
-            }
-
-        }
-        for(int i=0; i<5; i++)
-        {
-            MoveAllFromIncsToOpen();
-            UpdateAllPriorities();
-            this->ClearClosed();
-            mr= ComputePath(this->start_);
-            int bp;
-            if(mr>=0)
-                bp= this->buildPath();
-            if(bp>=0)
-            {
-                cout<<"First time planning successful."<<endl;
-                return mr;
-            }
-            else
-                cout<<"Planning failed, trying to replan."<<endl;
-
-
-        }
-        cout<<"Need to replan from scratch."<<endl;
-        return -1;
     }
 protected:
     int ComputePath(boost::shared_ptr < planning::State< Z, R> >   start)
