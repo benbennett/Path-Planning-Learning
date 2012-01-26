@@ -29,15 +29,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef STATE_HPP_
 #define STATE_HPP_
 #include <vector>
-#include <iterator>
 #include <cmath>
-#include <queue>
-#include <functional>
 #include <sstream>
 #include <string>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/functional/hash.hpp>
 #include <iostream>
 #include "stacktrace.hpp"
 namespace  planning

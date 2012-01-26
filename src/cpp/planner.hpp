@@ -40,12 +40,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "key.hpp"
 #include "priority_dict.hpp"
 #include <vector>
-#include <iterator>
 #include <list>
-#include <functional>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/functional/hash.hpp>
 #include <iostream>
 
 namespace  planning

@@ -1,16 +1,9 @@
 #ifndef PRIORITY_DICT_HPP_
 #define PRIORITY_DICT_HPP_
 #include <vector>
-#include <iterator>
-#include <list>
-#include <cmath>
 #include <queue>
-#include <functional>
-#include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/functional/hash.hpp>
-#include <iostream>
 namespace  planning
 {
 template <typename Z, class T >

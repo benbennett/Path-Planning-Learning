@@ -39,19 +39,7 @@ http://www.ri.cmu.edu/pub_files/pub4/likhachev_maxim_2005_1/likhachev_maxim_2005
 #ifndef ADA_STAR_HPP_
 #define ADA_STAR_HPP_
 
-#include "stacktrace.hpp"
-#include "state.hpp"
-#include "key.hpp"
 #include "planner.hpp"
-#include "priority_dict.hpp"
-#include <vector>
-#include <iterator>
-#include <list>
-#include <functional>
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/functional/hash.hpp>
-#include <iostream>
 namespace  planning
 {
 
